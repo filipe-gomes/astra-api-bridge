@@ -13,7 +13,8 @@ describe('/GET all activites', () => {
     chai.request(app)
       .get('/activities/all')
       .end((err, res) => {
-        res.should.have.status(501);
+        res.should.have.status(200);
+        // res.should.be.json;
         done();
       });
   });
