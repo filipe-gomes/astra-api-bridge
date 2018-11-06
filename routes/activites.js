@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var axios = require('axios')
+var axios = require('axios');
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
