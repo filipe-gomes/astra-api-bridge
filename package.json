@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "dev": "nodemon",
     "test": "mocha"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "tough-cookie": "^2.4.3"
   },
   "devDependencies": {
-    "chai-http": "^4.2.0"
+    "chai-http": "^4.2.0",
+    "nodemon": "^1.18.6"
   }
 }
