@@ -13,18 +13,18 @@ This is a middleware solution that leverages the [facade pattern](https://en.wik
 
 #### 1. Initial Setup
 
-Configure your Astra Schedule envrionment with a username and password that can be used for authentication from this middleware. Consider establishing a 'guest' account with access limited to reading data that you intend to surface from this facade middleware.  
+Configure your Astra Schedule envrionment with a username and password that can be used for authentication from this middleware. Consider establishing a 'guest' account with access limited to data that you intend to surface from this facade middleware.  
 
 #### 2. Clone the project
 
 `git clone https://github.com/adastradev/astra-api-facade.git`
 
 #### 3. Install all dependencies
-`npm install`
+Change into the project directory (e.g. `cd astra-api-facade`) and run `npm install`
 
 #### 4. Configure authentication
 
-Change into the project directory (e.g. `cd astra-api-facade`). Create a file called `.env` and configure it with the username and password you would like to use to connect to the Astra Schedule API
+Create a file called `.env` and configure it with the username and password you would like to use to connect to the Astra Schedule API
 
 ```
 API_USER=[replace_with_username]
@@ -37,7 +37,7 @@ API_PASSWORD=[replace with_password]
 # Run
 `npm start`
 
-This will run the app locally.  Open `http://localhost:8000` using a web browser to confirm that the middleware is running.  You should see [Swagger UI](https://github.com/swagger-api/swagger-ui) documentation for the Astra API Facade.  
+This will run the app locally.  Open `http://localhost:3000` using a web browser to confirm that the middleware is running.  You should see [Swagger UI](https://github.com/swagger-api/swagger-ui) documentation for the Astra API Facade.  
 
 Browse and test the API right from your browser using the Swaggger UI.  You can also utilize a tool like [Postman](https://www.getpostman.com/) to test and validate the facade.  
 
