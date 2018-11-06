@@ -13,10 +13,9 @@ describe('/GET all activites', () => {
     chai.request(app)
       .get('/activities/all')
       .end((err, res) => {
-        console.log(res.body);
         res.should.have.status(200);
         res.should.be.json;
         done();
       });
-  });
+  }).timeout(15000);
 });
