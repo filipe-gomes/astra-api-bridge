@@ -4,8 +4,59 @@ var axios = require('axios');
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
+const camelCase = require('camelcase');
 
-/* GET activites. */
+/**
+ * @swagger
+ * definition:
+ *   Activity:
+ *     properties:
+ *       activityId:
+ *         type: string
+ *       activityName:
+ *         type: string
+ *       startDate:
+ *         type: date
+ *         format: date-time
+ *       activityTypeCode:
+ *         type: integer
+ *       campusName:
+ *         type: string
+ *       buildingCode:
+ *         type: string
+ *       roomNumber:
+ *         type: string
+ *       locationName:
+ *         type: string
+ *       startDateTime:
+ *         type: string
+ *         format: date-time
+ *       endDateTime:
+ *         type: string
+ *         format: date-time
+ *       instructorName:
+ *         type: string
+ *       days:
+ *         type: string
+ *       canView:
+ *         type: boolean
+ */
+
+/**
+ * @swagger
+ * /activities/all:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns all activities
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
 router.get('/all', (req, res, next) => {
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -55,7 +106,7 @@ router.get('/all', (req, res, next) => {
           for (let i = 0; i < activityData.length; i++) {
             allActivities[i] = {}
             for (let j = 0; j < fieldList.length; j++) {
-              allActivities[i][fieldList[j]] = activityData[i][j];
+              allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
             }
           }
           res.setHeader('Content-Type', 'application/json');
