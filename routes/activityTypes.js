@@ -15,6 +15,8 @@ const camelCase = require('camelcase');
  *         type: string
  *       activityTypeName:
  *         type: string
+ *       index:
+ *         type: integer
  */
 
 /**
@@ -22,7 +24,7 @@ const camelCase = require('camelcase');
  * /activity-types/all:
  *   get:
  *     tags:
- *       - activity types
+ *       - activity-types
  *     description: Returns all activity types
  *     produces:
  *       - application/json
