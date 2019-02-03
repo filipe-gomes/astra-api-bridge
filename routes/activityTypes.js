@@ -77,8 +77,8 @@ router.get('/all', (req, res, next) => {
           let allEventTypes = []; 
           for (let i = 0; i < activityTypeData.length; i++) {
             allEventTypes[i] = {};
-            allEventTypes[i].id = activityTypeData[i][0];
-            allEventTypes[i].description = activityTypeData[i][1];
+            allEventTypes[i].activityTypeId = activityTypeData[i][0];
+            allEventTypes[i].activityTypeName = activityTypeData[i][1];
             allEventTypes[i].index = i;
           }
           res.setHeader('Content-Type', 'application/json');
