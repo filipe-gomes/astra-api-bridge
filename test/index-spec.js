@@ -2,7 +2,7 @@ const expect = require('chai').expect
 const server = require('../routes/index');
 const config = require('../config');
 
-describe('test', () => {
+describe('global and config tests', () => {
   it('should return a string', () => {
     expect('ci with travis').to.equal('ci with travis');
   });

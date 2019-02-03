@@ -8,10 +8,10 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-describe('/GET all activities', () => {
-  it('it should GET all the activities in friendly JSON', (done) => {
+describe('/GET all activity types', () => {
+  it('should GET all the activity types in friendly JSON', (done) => {
     chai.request(app)
-      .get('/activities/all')
+      .get('/activity-types/all')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;

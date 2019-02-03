@@ -8,6 +8,7 @@ config.defaultApi = {
   "password" :  process.env.API_PASSWORD || 'password',
   "logonEndpoint" : 'Logon.ashx',
   "activityListEndpoint": '~api/calendar/activityList?',
+  "activityTypesEndpoint": '~api/query/eventType?',
 }
 
 module.exports = config;
