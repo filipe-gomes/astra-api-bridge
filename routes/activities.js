@@ -122,4 +122,104 @@ router.get('/all', (req, res, next) => {
   });
 });
 
+/**
+ * @swagger
+ * /activities/findByDateRange:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns all activities in the given range
+ *     parameters:
+ *       - name: start
+ *         description: The beginning date for a range search (inclusive)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: date
+ *       - name: end
+ *         description: The end date for a range search (inclusive)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: date
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
+router.get('/findByDateRange', (req, res, next) => {
+  const filterStartDate = req.query.start;
+  const filterEndDate = req.query.end;
+  
+  if (filterStartDate && filterEndDate) {
+    const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+    const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+      +'&allowUnlimitedResults=true'
+      +'&fields=ActivityId%2CActivityName%2CStartDate%2CActivityTypeCode%2CCampusName%2CBuildingCode%2CRoomNumber%2CLocationName%2CStartDateTime%2CEndDateTime%2CInstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CDays%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CCanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CSectionId%2CEventId%2CEventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CParentActivityId%2CParentActivityName'
+      +'&filter=((StartDate>%3D"'
+      + filterStartDate
+      + 'T00%3A00%3A00")%26%26(EndDate<%3D"'
+      + filterEndDate
+      + 'T00%3A00%3A00"))'
+      +'&sortOrder=%2BStartDateTime'
+      +'&page=1'
+      +'&start=0'
+      +'&limit=200'
+      +'&sort=%5B%7B%22property%22%3A%22StartDateTime%22%2C%22direction%22%3A%22ASC%22%7D%5D';
+
+    const credentialData = {
+      username: config.defaultApi.username,
+      password: config.defaultApi.password,
+    };
+
+    axiosCookieJarSupport(axios);
+    const cookieJar = new tough.CookieJar();
+
+    axios.post(logonUrl, credentialData, {
+        jar: cookieJar,
+        headers: {
+          withCredentials: true,
+        }
+    }).then(function (response) {
+      if (response.data !== true) {
+        res.sendStatus(401);
+      }
+      cookieJar.store.getAllCookies(function(err, cookies) {
+        if (cookies === undefined) {
+          res.send('failed to get cookies after login');
+        } else {
+          axios.get(activitiesUrl, {
+            jar: cookieJar,
+            headers: {
+              cookie: cookies.join('; ')
+            }
+          }).then(function (response) {
+            let fieldList = response.data.fields.split(",");
+            let activityData = response.data.data;
+            let allActivities = [];
+            for (let i = 0; i < activityData.length; i++) {
+              allActivities[i] = {}
+              for (let j = 0; j < fieldList.length; j++) {
+                allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
+              }
+            }
+            res.setHeader('Content-Type', 'application/json');
+            res.send(allActivities);
+          }).catch(function (error) {
+            res.send('respond with a resource - error ' + error);
+          });
+        }
+      });
+    })
+    .catch(function (error) {
+      res.send('respond with a resource - error ' + error);
+    });
+  } else {
+    res.send('invalid parameters');
+  }
+});
+
 module.exports = router;
