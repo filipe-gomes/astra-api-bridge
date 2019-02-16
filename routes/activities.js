@@ -5,6 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
+const QueryBuilder = require('../utility/queryBuilder');
 
 /**
  * @swagger
@@ -154,21 +155,29 @@ router.get('/findByDateRange', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
   
+    var qb = new QueryBuilder();
+    qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode']);
+    qb.addFields(['CampusName', 'BuildingCode', 'RoomNumber', 'LocationName']);
+    qb.addFields(['StartDateTime', 'EndDateTime']);
+    qb.addField('InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
+    qb.addField('Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
+    qb.addField('CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
+    qb.addFields(['SectionId', 'EventId']);
+    qb.addField('EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
+    qb.addFields(['ParentActivityId', 'ParentActivityName']);
+    qb.startDate = filterStartDate;
+    qb.endDate = filterEndDate;
+
+    // todo add some of the other fields below:
+    //qb.addFields(['MeetingType', 'Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
+    //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
+    //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+    //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+
   if (filterStartDate && filterEndDate) {
     const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
     const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
-      +'&allowUnlimitedResults=true'
-      +'&fields=ActivityId%2CActivityName%2CStartDate%2CActivityTypeCode%2CCampusName%2CBuildingCode%2CRoomNumber%2CLocationName%2CStartDateTime%2CEndDateTime%2CInstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CDays%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CCanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CSectionId%2CEventId%2CEventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CParentActivityId%2CParentActivityName'
-      +'&filter=((StartDate>%3D"'
-      + filterStartDate
-      + 'T00%3A00%3A00")%26%26(EndDate<%3D"'
-      + filterEndDate
-      + 'T00%3A00%3A00"))'
-      +'&sortOrder=%2BStartDateTime'
-      +'&page=1'
-      +'&start=0'
-      +'&limit=200'
-      +'&sort=%5B%7B%22property%22%3A%22StartDateTime%22%2C%22direction%22%3A%22ASC%22%7D%5D';
+      + qb.toQueryString();
 
     const credentialData = {
       username: config.defaultApi.username,
