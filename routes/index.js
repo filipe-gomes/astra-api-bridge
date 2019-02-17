@@ -6,7 +6,7 @@ var swaggerUI = require('swagger-ui-express');
 var swaggerDefinition = {
   info: {
     title: 'Astra API Facade',
-    version: '0.0.1',
+    version: '0.0.2',
     description: 'This is a RESTful API that layers on top of the Astra Schedule API',
   },
   host: 'localhost:3000',
@@ -21,6 +21,12 @@ var swaggerOptions = {
 var swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 router.use('/', swaggerUI.serve);
+
+router.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://astra.live");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 router.get('/', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
