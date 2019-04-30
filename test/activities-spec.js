@@ -38,7 +38,7 @@ describe('/GET all activities by date range', () => {
   }).timeout(15000);
 
   // todo RT, instead of hard-coding, determine current month programmatically
-  // done-diva
+  // done-diva 2019-04-29
   it('it should GET all the activities in the previous month in friendly JSON', (done) => {
     chai.request(app)
       .get('/activities/findByDateRange?start='+pfirst+'&end='+plast)

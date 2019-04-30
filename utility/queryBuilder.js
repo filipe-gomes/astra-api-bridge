@@ -5,13 +5,21 @@ module.exports = class QueryBuilder {
     constructor() {
         this._fields = [];
         this._allowUnlimitedResults = false;
-        this._startDate = ''
-        this._endDate = ''
-        this._sortOrder = ''
+        this._startDate = '';
+        this._endDate = '';
+        this._sortOrder = '';
         this._page = 1;
         this._startIndex = 0;
         this._limit = 200;
         this._sort = '';
+    }
+
+    get sortorder() {
+        return this._sortOrder;
+    }
+
+    set sortorder(string) {
+        this._sortOrder = string; 
     }
 
     get startDate() {
@@ -48,7 +56,7 @@ module.exports = class QueryBuilder {
         query += '&fields=' + this._fields.join('%2C');
         query += '&filter=((StartDate>%3D"' + this._startDate + 'T00%3A00%3A00")';
         query += '%26%26(EndDate<%3D"' + this._endDate + 'T00%3A00%3A00"))';
-        query += '&sortOrder=%2BStartDateTime';
+        query += '&sortOrder='+this._sortOrder;
         query += '&page=' + this._page;
         query += '&start=' + this._startIndex;
         query += '&limit=' + this. _limit;
