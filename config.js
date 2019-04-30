@@ -9,6 +9,7 @@ config.defaultApi = {
   "logonEndpoint" : 'Logon.ashx',
   "activityListEndpoint": '~api/calendar/activityList?',
   "activityTypesEndpoint": '~api/query/eventType?',
+  "buildingsEndpoint": '~api/query/building?'
 }
 
 module.exports = config;
