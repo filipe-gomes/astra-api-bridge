@@ -11,8 +11,8 @@ describe('global and config tests', () => {
     expect(config).to.not.be.undefined;
   });
 
-  it('should have a default api', () => {
-    expect(config.defaultApi.url).to.equal('https://test.aaiscloud.com/DemoAS8Solutions/');
+  it('should have a non-empty api', () => {
+    expect(config.defaultApi.url).to.not.be.empty;
   });
 
   it('should have a non-empty api username', () => {

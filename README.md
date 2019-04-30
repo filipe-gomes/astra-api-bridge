@@ -24,11 +24,12 @@ Change into the project directory (e.g. `cd astra-api-facade`) and run `npm inst
 
 #### 4. Configure authentication
 
-Create a file called `.env` and configure it with the username and password you would like to use to connect to the Astra Schedule API
+Create a file called `.env` and configure it with the site, username, and password you would like to use to connect to the Astra Schedule API (do not include the brackets)
 
 ```
 API_USER=[replace_with_username]
 API_PASSWORD=[replace with_password]
+API_SITE=[replace with site url]
 ```
 
 #### 5. Run the tests  

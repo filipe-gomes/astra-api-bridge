@@ -3,7 +3,7 @@ require('dotenv').config();
 var config = {};
 
 config.defaultApi = {
-  "url" : "https://test.aaiscloud.com/DemoAS8Solutions/",
+  "url" : process.env.API_SITE || 'site',
   "username" : process.env.API_USER || 'username',
   "password" :  process.env.API_PASSWORD || 'password',
   "logonEndpoint" : 'Logon.ashx',
