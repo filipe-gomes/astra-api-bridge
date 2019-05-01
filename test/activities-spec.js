@@ -34,6 +34,7 @@ describe('/GET all activities by date range', () => {
         res.should.have.status(200);
         res.should.be.json;
         done();
+//        console.log(res);
       });
   }).timeout(15000);
 
@@ -49,4 +50,17 @@ describe('/GET all activities by date range', () => {
       });
   }).timeout(15000);
 
+});
+
+describe('/GET filtered activities', () => {
+  it('it should GET all the filtered activities in friendly JSON', (done) => {
+    chai.request(app)
+      .get('/activities/filterbyActivityType?start='+cfirst+'&end='+clast+'&activitytype=EventType&typename=Internal Meeting')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.be.json;
+        done();
+      });
+  }).timeout(15000);
+  
 });
