@@ -7,6 +7,9 @@ const config = require('../config');
 const camelCase = require('camelcase');
 const QueryBuilder = require('../utility/queryBuilder');
 
+
+
+
 /**
  * @swagger
  * definition:
@@ -116,14 +119,38 @@ router.get('/all', (req, res, next) => {
             cookie: cookies.join('; ')
           }
         }).then(function (response) {
-          let fieldList = response.data.fields.split(",");
+// this doesn't work because of the strjoin array fields          
+//          let fieldList = response.data.fields.split(",");
           let activityData = response.data.data;
           let allActivities = [];
           for (let i = 0; i < activityData.length; i++) {
-            allActivities[i] = {}
-            for (let j = 0; j < fieldList.length; j++) {
-              allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
-            }
+            allActivities[i] = {};
+            allActivities[i].activityId = activityData[i][0];
+            allActivities[i].activityName = activityData[i][1];
+            allActivities[i].startDate = activityData[i][2];
+            allActivities[i].activityTypeCode = activityData[i][3];
+            allActivities[i].campusName = activityData[i][4];
+            allActivities[i].buildingCode = activityData[i][5];
+            allActivities[i].roomNumber = activityData[i][6];
+            allActivities[i].locationName = activityData[i][7];
+            allActivities[i].startDateTime = activityData[i][8];
+            allActivities[i].endDateTime = activityData[i][9];
+            allActivities[i].instructorName = activityData[i][10];
+            allActivities[i].days = activityData[i][11];
+            allActivities[i].canView = activityData[i][12];
+//            allActivities[i].sectionId = activityData[i][13];
+//            allActivities[i].eventId = activityData[i][14];
+//            allActivities[i].eventImage = activityData[i][15];
+//            allActivities[i].parentactivityId = activityData[i][16];
+//            allActivities[i].parentactivityName = activityData[i][17];
+            allActivities[i].eventType = activityData[i][18];
+            allActivities[i].eventMeetingType = activityData[i][19];
+            allActivities[i].sectionMeetingType = activityData[i][20];
+            allActivities[i].index = i;
+           
+//            for (let j = 0; j < fieldList.length; j++) {
+//              allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
+//            }
           }
           res.setHeader('Content-Type', 'application/json');
           res.send(allActivities);
@@ -136,7 +163,6 @@ router.get('/all', (req, res, next) => {
   .catch(function (error) {
     res.send('respond with a resource - error ' + error);
   });
-//  console.log(res)
 });
 
 /**
@@ -226,14 +252,32 @@ router.get('/findByDateRange', (req, res, next) => {
               cookie: cookies.join('; ')
             }
           }).then(function (response) {
-            let fieldList = response.data.fields.split(",");
             let activityData = response.data.data;
             let allActivities = [];
             for (let i = 0; i < activityData.length; i++) {
-              allActivities[i] = {}
-              for (let j = 0; j < fieldList.length; j++) {
-                allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
-              }
+              allActivities[i] = {};
+              allActivities[i].activityId = activityData[i][0];
+              allActivities[i].activityName = activityData[i][1];
+              allActivities[i].startDate = activityData[i][2];
+              allActivities[i].activityTypeCode = activityData[i][3];
+              allActivities[i].campusName = activityData[i][4];
+              allActivities[i].buildingCode = activityData[i][5];
+              allActivities[i].roomNumber = activityData[i][6];
+              allActivities[i].locationName = activityData[i][7];
+              allActivities[i].startDateTime = activityData[i][8];
+              allActivities[i].endDateTime = activityData[i][9];
+              allActivities[i].instructorName = activityData[i][10];
+              allActivities[i].days = activityData[i][11];
+              allActivities[i].canView = activityData[i][12];
+  //            allActivities[i].sectionId = activityData[i][13];
+  //            allActivities[i].eventId = activityData[i][14];
+  //            allActivities[i].eventImage = activityData[i][15];
+  //            allActivities[i].parentactivityId = activityData[i][16];
+  //            allActivities[i].parentactivityName = activityData[i][17];
+              allActivities[i].eventType = activityData[i][18];
+              allActivities[i].eventMeetingType = activityData[i][19];
+              allActivities[i].sectionMeetingType = activityData[i][20];
+              allActivities[i].index = i;              
             }
             res.setHeader('Content-Type', 'application/json');
             res.send(allActivities);
@@ -344,14 +388,32 @@ if (filterStartDate && filterEndDate) {
               cookie: cookies.join('; ')
             }
           }).then(function (response) {
-            let fieldList = response.data.fields.split(",");
             let activityData = response.data.data;
             let allActivities = [];
             for (let i = 0; i < activityData.length; i++) {
               allActivities[i] = {}
-              for (let j = 0; j < fieldList.length; j++) {
-                allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
-              }
+              allActivities[i].activityId = activityData[i][0];
+              allActivities[i].activityName = activityData[i][1];
+              allActivities[i].startDate = activityData[i][2];
+              allActivities[i].activityTypeCode = activityData[i][3];
+              allActivities[i].campusName = activityData[i][4];
+              allActivities[i].buildingCode = activityData[i][5];
+              allActivities[i].roomNumber = activityData[i][6];
+              allActivities[i].locationName = activityData[i][7];
+              allActivities[i].startDateTime = activityData[i][8];
+              allActivities[i].endDateTime = activityData[i][9];
+              allActivities[i].instructorName = activityData[i][10];
+              allActivities[i].days = activityData[i][11];
+              allActivities[i].canView = activityData[i][12];
+  //            allActivities[i].sectionId = activityData[i][13];
+  //            allActivities[i].eventId = activityData[i][14];
+  //            allActivities[i].eventImage = activityData[i][15];
+  //            allActivities[i].parentactivityId = activityData[i][16];
+  //            allActivities[i].parentactivityName = activityData[i][17];
+              allActivities[i].eventType = activityData[i][18];
+              allActivities[i].eventMeetingType = activityData[i][19];
+              allActivities[i].sectionMeetingType = activityData[i][20];
+              allActivities[i].index = i;              
             }
             res.setHeader('Content-Type', 'application/json');
             res.send(allActivities);

@@ -28,7 +28,7 @@ module.exports = class QueryBuilder {
             this._filterfield = 'EventMeetingByActivityId.EventMeetingType.Name';
         }
         else if (string == "SectionMeetingType"){
-            this._filterfield = 'SectionMeetInstanceByActivityId.Section.MeetingType.Name';
+            this._filterfield = 'SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name';
         }        
         else {
         this._filterfield = string; 

@@ -55,7 +55,7 @@ describe('/GET all activities by date range', () => {
 describe('/GET filtered activities', () => {
   it('it should GET all the filtered activities in friendly JSON', (done) => {
     chai.request(app)
-      .get('/activities/filterbyActivityType?start='+cfirst+'&end='+clast+'&activitytype=EventType&typename=Internal Meeting')
+      .get('/activities/filterbyActivityType?start='+cfirst+'&end='+clast+'&activitytype=SectionMeetingType&typename=LEC')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
