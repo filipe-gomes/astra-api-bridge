@@ -5,6 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
+const QueryBuilder = require('../utility/queryBuilder');
 
 /**
  * @swagger
@@ -204,16 +205,115 @@ router.get('/buildings', (req, res, next) => {
  *           $ref: '#/definitions/room'
  */
 router.get('/rooms', (req, res, next) => {
+  
+  var qb = new QueryBuilder();
+  qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
+  qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
+  qb.sortOrder = '%2BBuilding.Name,Name';
+  qb.filterfield = 'RoomConflicts';
+  qb.filtervalue = '';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
-    +'_dc=1523226229268'
+    +qb.toQueryString();
+/**    +'_dc=1523226229268'
     +'&fields=Id%2CName%2CroomNumber%2CRoomType.Name%2CBuilding.Name%2CBuilding.BuildingCode%2CMaxOccupancy%2CIsActive'
     +'&_s=1'
     +'&sortOrder=Building.Name%2CName'
     +'&page=1'
-    +'&start=0'
+    +'&start=0'o
     +'&limit=100';
+*/
+  const credentialData = {
+    username: config.defaultApi.username,
+    password: config.defaultApi.password,
+  };
+
+  axiosCookieJarSupport(axios);
+  const cookieJar = new tough.CookieJar();
+
+  axios.post(logonUrl, credentialData, {
+      jar: cookieJar,
+      headers: {
+        withCredentials: true,
+      }
+  }).then(function (response) {
+    if (response.data !== true) {
+      res.sendStatus(401);
+    }
+    cookieJar.store.getAllCookies(function(err, cookies) {
+      if (cookies === undefined) {
+        res.send('failed to get cookies after login');
+      } else {
+        axios.get(roomsUrl, {
+          jar: cookieJar,
+          headers: {
+            cookie: cookies.join('; ')
+          }
+        }).then(function (response) {          
+          let roomData = response.data.data;
+          let allrooms = []; 
+          for (let i = 0; i < roomData.length; i++) {
+            allrooms[i] = {};
+            allrooms[i].roomId = roomData[i][0];
+            allrooms[i].roomName = roomData[i][1];
+            allrooms[i].roomNumber = roomData[i][2];
+            allrooms[i].roomType = roomData[i][3];
+            allrooms[i].buildingName = roomData[i][4];
+            allrooms[i].buildingCode = roomData[i][5];
+            allrooms[i].maxOccupancy = roomData[i][6];
+            allrooms[i].isActive = roomData[i][7];
+            allrooms[i].index = i;
+          }
+          res.setHeader('Content-Type', 'application/json');
+          res.send(allrooms);
+        }).catch(function (error) {
+          res.send('respond with a resource - error ' + error);
+        });
+      }
+    });
+  })
+  .catch(function (error) {
+    res.send('respond with a resource - error ' + error);
+  });
+});
+
+/**
+ * @swagger
+ * /facilities/rooms:
+ *   get:
+ *     tags:
+ *       - facilities
+ *     description: Returns all rooms
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of rooms
+ *         schema:
+ *           $ref: '#/definitions/room'
+ */
+router.get('/availrooms', (req, res, next) => {
+  const filterconflicts = req.query.conflict;
+
+  var qb = new QueryBuilder();
+  qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
+  qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
+  qb.sortOrder = '%2BBuilding.Name,Name';
+  qb.filterfield = 'RoomConflicts';
+  qb.filtervalue = '';
+//  console.log(filterconflicts.length);
+  let conflictfields = {};
+  conflictfields =filterconflicts.split(",");
+  console.log('conflictfields: '+conflictfields.length);
+  for (let i = 0; i < conflictfields.length; i++) {
+    qb.addConflicts(conflictfields[i]);
+  };
+
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
+    +qb.toQueryString();
+   // console.log(roomsUrl);
 
   const credentialData = {
     username: config.defaultApi.username,
