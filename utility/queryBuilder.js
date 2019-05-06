@@ -137,7 +137,7 @@ module.exports = class QueryBuilder {
         query += '&limit=' + this._limit;
         query = query.replace(/\./g, '%2E');
         query = query.replace(/\:/g, '%3A');
-        console.log(query);
+//        console.log(query);
         return query;
         
     }

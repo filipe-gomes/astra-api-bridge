@@ -366,7 +366,7 @@ router.get('/availrooms', (req, res, next) => {
           }
           res.setHeader('Content-Type', 'application/json');
           res.send(allrooms);
-          console.log(allrooms.length);
+//          console.log(allrooms.length);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
