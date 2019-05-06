@@ -38,8 +38,7 @@ describe('/GET all activities by date range', () => {
       });
   }).timeout(15000);
 
-  // todo RT, instead of hard-coding, determine current month programmatically
-  // done-diva 2019-04-29
+  // done-diva 2019-04-29: todo RT, instead of hard-coding, determine current month programmatically
   it('it should GET all the activities in the previous month in friendly JSON', (done) => {
     chai.request(app)
       .get('/activities/findByDateRange?start='+pfirst+'&end='+plast)
@@ -62,5 +61,19 @@ describe('/GET filtered activities', () => {
         done();
       });
   }).timeout(15000);
+ 
+});
   
+  describe('/GET all conflicting activities for a room by datetime range', () => {
+    var conflicts = '';
+    it('it should GET all the conflicting activities for a room in friendly JSON', (done) => {
+      chai.request(app)
+        .get('/activities/findroomConflicts?start=2019-05-01T13:00:00&end=2019-05-01T19:30:00&roomId=bcd22d76-ad89-49ae-9fcf-17e5184ec6e3')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.should.be.json;
+          done();
+        });
+    }).timeout(15000);
+
 });

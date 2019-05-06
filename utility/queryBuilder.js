@@ -105,11 +105,14 @@ module.exports = class QueryBuilder {
             query += '&filter=((StartDate>%3D"' + this._startDate + 'T00%3A00%3A00")';
             query += '%26%26(EndDate<%3D"' + this._endDate + 'T00%3A00%3A00"))';
         }
-        else if (this._filterfield == "StartTime"){
+        else if (this._filterfield.match(/StartTime.*/)){
             query += '&filter=(((StartDateTime<%3D"' + this._endDate +'")';
             query += '%26%26(EndDateTime>%3D"' + this._startDate +'"))';
             query += '%7C%7C((StartDateTime>%3D"' + this._startDate + '")';
             query += '%26%26(StartDateTime<%3D"' + this._endDate +'")))';
+            if (this._filterfield.match(/.*Room/)){
+                query += '%26%26(Location.RoomId!="'+this._filtervalue+'")';
+            }
         } 
         else if (this._filterfield == "RoomConflicts"){
             if (this._conflicts.length > 0) {

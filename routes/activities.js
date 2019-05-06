@@ -51,6 +51,13 @@ const QueryBuilder = require('../utility/queryBuilder');
  *         type: string
  */
 
+    // todo add some of the other fields below:
+    //qb.addFields([Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
+    //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
+    //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+    //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+
+
 /**
  * @swagger
  * /activities/all:
@@ -214,12 +221,6 @@ router.get('/findByDateRange', (req, res, next) => {
     qb.filtervalue = '';
     qb.startDate = filterStartDate;
     qb.endDate = filterEndDate;
-
-    // todo add some of the other fields below:
-    //qb.addFields([Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
-    //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
-    //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
-    //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
 
   if (filterStartDate && filterEndDate) {
     const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -482,6 +483,144 @@ router.get('/findConflicts', (req, res, next) => {
     qb.sortOrder = '%2BStartDateTime';
     qb.filterfield = 'StartTime';
     qb.filtervalue = '';
+    qb.startDate = filterStartDate;
+    qb.endDate = filterEndDate;
+
+  if (filterStartDate && filterEndDate) {
+    const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+    const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+      + qb.toQueryString();
+
+    const credentialData = {
+      username: config.defaultApi.username,
+      password: config.defaultApi.password,
+    };
+
+    axiosCookieJarSupport(axios);
+    const cookieJar = new tough.CookieJar();
+
+    axios.post(logonUrl, credentialData, {
+        jar: cookieJar,
+        headers: {
+          withCredentials: true,
+        }
+    }).then(function (response) {
+      if (response.data !== true) {
+        res.sendStatus(401);
+      }
+      cookieJar.store.getAllCookies(function(err, cookies) {
+        if (cookies === undefined) {
+          res.send('failed to get cookies after login');
+        } else {
+          axios.get(activitiesUrl, {
+            jar: cookieJar,
+            headers: {
+              cookie: cookies.join('; ')
+            }
+          }).then(function (response) {
+            let activityData = response.data.data;
+            let allActivities = [];
+            for (let i = 0; i < activityData.length; i++) {
+              allActivities[i] = {};
+              allActivities[i].activityId = activityData[i][0];
+              allActivities[i].activityName = activityData[i][1];
+              allActivities[i].startDate = activityData[i][2];
+              allActivities[i].activityTypeCode = activityData[i][3];
+              allActivities[i].campusName = activityData[i][4];
+              allActivities[i].buildingCode = activityData[i][5];
+              allActivities[i].roomNumber = activityData[i][6];
+              allActivities[i].locationName = activityData[i][7];
+              allActivities[i].startDateTime = activityData[i][8];
+              allActivities[i].endDateTime = activityData[i][9];
+              allActivities[i].instructorName = activityData[i][10];
+              allActivities[i].days = activityData[i][11];
+              allActivities[i].canView = activityData[i][12];
+  //            allActivities[i].sectionId = activityData[i][13];
+  //            allActivities[i].eventId = activityData[i][14];
+  //            allActivities[i].eventImage = activityData[i][15];
+  //            allActivities[i].parentactivityId = activityData[i][16];
+  //            allActivities[i].parentactivityName = activityData[i][17];
+              allActivities[i].eventType = activityData[i][18];
+              allActivities[i].eventMeetingType = activityData[i][19];
+              allActivities[i].sectionMeetingType = activityData[i][20];
+              allActivities[i].roomId = activityData[i][21];
+              allActivities[i].index = i;              
+            }
+            res.setHeader('Content-Type', 'application/json');
+            res.send(allActivities);
+          }).catch(function (error) {
+            res.send('respond with a resource - error ' + error);
+          });
+        }
+      });
+    })
+    .catch(function (error) {
+      res.send('respond with a resource - error ' + error);
+    });
+  } else {
+    res.send('invalid parameters');
+  }
+});
+
+/**
+ * @swagger
+ * /activities/findroomConflicts:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns all activities in the given range
+ *     parameters:
+ *       - name: start
+ *         description: The beginning datetime (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime
+ *       - name: end
+ *         description: The end date for a range search (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime
+ *       - name: roomId
+ *         description: roomid to filter down conflict range
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: string
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
+router.get('/findroomConflicts', (req, res, next) => {
+  const filterStartDate = req.query.start;
+  const filterEndDate = req.query.end;
+  const filterRoomId = req.query.roomId;
+  
+    var qb = new QueryBuilder();
+    qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode']);
+    qb.addFields(['CampusName', 'BuildingCode', 'RoomNumber', 'LocationName']);
+    qb.addFields(['StartDateTime', 'EndDateTime']);
+    qb.addFields(['InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+    qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+    qb.addFields(['CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+    qb.addFields(['SectionId', 'EventId']);
+    qb.addFields(['EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+    qb.addFields(['ParentActivityId', 'ParentActivityName']);
+    qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name'])
+    qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
+    qb.sortOrder = '%2BStartDateTime';
+    if (filterRoomId){
+      qb.filterfield = 'StartTime,Room';
+      qb.filtervalue = filterRoomId;
+    }else{
+      qb.filterfield = 'StartTime';
+      qb.filtervalue = '';
+    }
     qb.startDate = filterStartDate;
     qb.endDate = filterEndDate;
 
