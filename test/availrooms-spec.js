@@ -38,14 +38,11 @@ describe('/GET all conflicting activities by datetime range', () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
-        console.log(res);
+//        console.log(res);
         done();
       });
   }).timeout(15000);
 
 });
 
-//describe('/GET availablerooms?conflict='+conflicts, () => {
-  
-//});
 

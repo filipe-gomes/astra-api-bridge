@@ -82,7 +82,11 @@ module.exports = class QueryBuilder {
 
     addconflict(field) {
         if (field) {
-             this._conflicts.push(field);
+            let conflictfields = {};
+            conflictfields = field.split(",");
+             for (let i = 0; i < conflictfields.length; i++) {
+             this._conflicts.push(conflictfields[i]);
+            }
         }
     }
 
@@ -108,15 +112,16 @@ module.exports = class QueryBuilder {
             query += '%26%26(StartDateTime<%3D"' + this._endDate +'")))';
         } 
         else if (this._filterfield == "RoomConflicts"){
-            if (this._conflicts) {query += '&filter = ('
-            for (let i = 0; i < this._conflicts.length; i++) {
-                if (this._conflicts.length-1 == i){
-                  query += 'Id%20!=%20"'+this._conflicts[i]+'")';
+            if (this._conflicts.length > 0) {
+                query += '&filter=(';
+                for (let i = 0; i < this._conflicts.length; i++) {
+                    if (this._conflicts.length-1 == i){
+                        query += '(Id!="'+this._conflicts[i]+'"))';
+                    }
+                    else {
+                        query += '(Id!="'+this._conflicts[i]+'")%26%26';
+                    }
                 }
-                else {
-                  query += 'Id%20!=%20"'+this._conflicts[i]+'"&&';
-                }
-              }
             }
             else {}
         } 
@@ -126,7 +131,7 @@ module.exports = class QueryBuilder {
         query += '&sortOrder='+this._sortOrder;
         query += '&page=' + this._page;
         query += '&start=' + this._startIndex;
-        query += '&limit=' + this. _limit;
+        query += '&limit=' + this._limit;
         query = query.replace(/\./g, '%2E');
         query = query.replace(/\:/g, '%3A');
         console.log(query);

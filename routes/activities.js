@@ -444,13 +444,13 @@ if (filterStartDate && filterEndDate) {
  *     description: Returns all activities in the given range
  *     parameters:
  *       - name: start
- *         description: The beginning date for a range search (inclusive)
+ *         description: The beginning datetime (YYYY-MM-DDTHH:MM:SS)
  *         in: query
  *         required: true
  *         type: string 
  *         format: datetime
  *       - name: end
- *         description: The end date for a range search (inclusive)
+ *         description: The end date for a range search (YYYY-MM-DDTHH:MM:SS)
  *         in: query
  *         required: true
  *         type: string 

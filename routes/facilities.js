@@ -280,11 +280,24 @@ router.get('/rooms', (req, res, next) => {
 
 /**
  * @swagger
- * /facilities/rooms:
+ * /facilities/availrooms:
  *   get:
  *     tags:
  *       - facilities
  *     description: Returns all rooms
+ *     parameters:
+ *       - name: start
+ *         description: The beginning datetime for a range search (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime
+ *       - name: end
+ *         description: The end datetime for a range search (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime 
  *     produces:
  *       - application/json
  *     responses:
@@ -302,13 +315,8 @@ router.get('/availrooms', (req, res, next) => {
   qb.sortOrder = '%2BBuilding.Name,Name';
   qb.filterfield = 'RoomConflicts';
   qb.filtervalue = '';
-//  console.log(filterconflicts.length);
-  let conflictfields = {};
-  conflictfields =filterconflicts.split(",");
-  console.log('conflictfields: '+conflictfields.length);
-  for (let i = 0; i < conflictfields.length; i++) {
-    qb.addConflicts(conflictfields[i]);
-  };
+  qb.addconflict(filterconflicts);
+
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
