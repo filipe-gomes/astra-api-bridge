@@ -130,6 +130,10 @@ module.exports = class QueryBuilder {
         } 
         else {
             query += '&filter='+this._filterfield+'%20in%20("'+this._filtervalue+'")';
+            if(this._startDate != ''){
+                query += '%26%26((StartDate>%3D"' + this._startDate + 'T00%3A00%3A00")';
+                query += '%26%26(EndDate<%3D"' + this._endDate + 'T00%3A00%3A00"))';
+            }
         }
         query += '&sortOrder='+this._sortOrder;
         query += '&page=' + this._page;
