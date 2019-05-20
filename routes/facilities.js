@@ -321,7 +321,6 @@ router.get('/availrooms', (req, res, next) => {
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
     +qb.toQueryString();
-   // console.log(roomsUrl);
 
   const credentialData = {
     username: config.defaultApi.username,
@@ -366,7 +365,6 @@ router.get('/availrooms', (req, res, next) => {
           }
           res.setHeader('Content-Type', 'application/json');
           res.send(allrooms);
-//          console.log(allrooms.length);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });

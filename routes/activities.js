@@ -91,12 +91,11 @@ router.get('/all', (req, res, next) => {
     +'%2CSectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name%2CLocation.RoomId'
     +'&entityProps='
     +'&_s=1'
-    +'&sortOrder=%2BStartDateTime'
+    +'&sortOrder=StartDateTime'
     +'&page=1'
     +'&start=0'
     +'&limit=20'
     +'&sort=%5B%7B%22property%22%3A%22StartDateTime%22%2C%22direction%22%3A%22ASC%22%7D%5D';
-//    console.log(activitiesUrl);
 
   const credentialData = {
     username: config.defaultApi.username,
@@ -216,7 +215,7 @@ router.get('/findByDateRange', (req, res, next) => {
     qb.addFields(['ParentActivityId', 'ParentActivityName']);
     qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name'])
     qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
-    qb.sortOrder = '%2BStartDateTime';
+    qb.sortOrder = 'StartDateTime';
     qb.filterfield = 'StartDate';
     qb.filtervalue = '';
     qb.startDate = filterStartDate;
@@ -352,9 +351,9 @@ router.get('/filterbyActivityType', (req, res, next) => {
     qb.addFields(['SectionId', 'EventId']);
     qb.addFields(['EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
     qb.addFields(['ParentActivityId', 'ParentActivityName']);
-    qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name'])
+    qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name']);
     qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
-    qb.sortOrder = '%2BStartDateTime';
+    qb.sortOrder = 'StartDateTime';
     qb.filterfield = filterActivityType;
     qb.filtervalue = filterTypeName;
     qb.startDate = filterStartDate;
@@ -480,7 +479,7 @@ router.get('/findConflicts', (req, res, next) => {
     qb.addFields(['ParentActivityId', 'ParentActivityName']);
     qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name'])
     qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
-    qb.sortOrder = '%2BStartDateTime';
+    qb.sortOrder = 'StartDateTime';
     qb.filterfield = 'StartTime';
     qb.filtervalue = '';
     qb.startDate = filterStartDate;

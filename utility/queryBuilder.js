@@ -44,11 +44,11 @@ module.exports = class QueryBuilder {
         this._filtervalue = string;
     }
 
-    get sortorder() {
+    get sortOrder() {
         return this._sortOrder;
     }
 
-    set sortorder(string) {
+    set sortOrder(string) {
         this._sortOrder = string; 
     }
 
@@ -141,7 +141,6 @@ module.exports = class QueryBuilder {
         query += '&limit=' + this._limit;
         query = query.replace(/\./g, '%2E');
         query = query.replace(/\:/g, '%3A');
-//        console.log(query);
         return query;
         
     }

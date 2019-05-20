@@ -34,7 +34,6 @@ describe('/GET all activities by date range', () => {
         res.should.have.status(200);
         res.should.be.json;
         done();
-//        console.log(res);
       });
   }).timeout(15000);
 
