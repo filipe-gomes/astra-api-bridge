@@ -7,7 +7,7 @@ const config = require('../config');
 const camelCase = require('camelcase');
 const QueryBuilder = require('../utility/queryBuilder');
 
-/**
+{/**swagger def
  * @swagger
  * definition:
  *   Activity:
@@ -56,7 +56,7 @@ const QueryBuilder = require('../utility/queryBuilder');
     //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
     //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
     //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
-
+}
 
 /**
  * @swagger
@@ -65,6 +65,13 @@ const QueryBuilder = require('../utility/queryBuilder');
  *     tags:
  *       - activities
  *     description: Returns all activities
+ *     parameters:
+ *       - name: activitycategory
+ *         description: Select an activity category filter
+ *         in: query
+ *         enum: ["All","Academics","Events"]
+ *         required: true
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -76,6 +83,16 @@ const QueryBuilder = require('../utility/queryBuilder');
 router.get('/all', (req, res, next) => {
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitycat = req.query.activitycategory;
+  let withfilter = '';
+  if (activitycat == 'Academics'){
+    withfilter += '&filter=(ActivityTypeCode==1)';
+  }else if (activitycat == 'Events'){
+    withfilter += '&filter=(ActivityTypeCode!=1)';
+  };
+  withfilter +='&entityProps='+'&_s=1'+'&sortOrder=StartDateTime'+'&page=1'
+    +'&start=0'
+    +'&sort=%5B%7B%22property%22%3A%22StartDateTime%22%2C%22direction%22%3A%22ASC%22%7D%5D';
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
     +'_dc=1523226229268'
     +'&allowUnlimitedResults=true'
@@ -89,14 +106,7 @@ router.get('/all', (req, res, next) => {
     +'%2CParentActivityId%2CParentActivityName'
     +'%2CEventMeetingByActivityId.Event.EventType.Name%2CEventMeetingByActivityId.EventMeetingType.Name'
     +'%2CSectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name%2CLocation.RoomId'
-    +'&entityProps='
-    +'&_s=1'
-    +'&sortOrder=StartDateTime'
-    +'&page=1'
-    +'&start=0'
-    +'&limit=20'
-    +'&sort=%5B%7B%22property%22%3A%22StartDateTime%22%2C%22direction%22%3A%22ASC%22%7D%5D';
-
+    +withfilter;
   const credentialData = {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
@@ -183,13 +193,13 @@ router.get('/all', (req, res, next) => {
  *         description: The beginning date for a range search (inclusive)
  *         in: query
  *         required: true
- *         type: string 
+ *         type: string
  *         format: date
  *       - name: end
  *         description: The end date for a range search (inclusive)
  *         in: query
  *         required: true
- *         type: string 
+ *         type: string
  *         format: date
  *     produces:
  *       - application/json
@@ -318,8 +328,9 @@ router.get('/findByDateRange', (req, res, next) => {
  *         type: string 
  *         format: date
  *       - name: activitytype
- *         description: Enter the activitytype (EventType,EventMeetingType,SectionMeetingType)
+ *         description: Select an activitytype
  *         in: query
+ *         enum: ["EventType","EventMeetingType","SectionMeetingType"]
  *         required: true
  *         type: string 
  *       - name: typename
