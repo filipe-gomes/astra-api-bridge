@@ -529,6 +529,7 @@ router.get('/findConflicts', (req, res, next) => {
             }
           }).then(function (response) {
             let activityData = response.data.data;
+            let conflictstr = '';
             let allActivities = [];
             for (let i = 0; i < activityData.length; i++) {
               allActivities[i] = {};
@@ -554,6 +555,10 @@ router.get('/findConflicts', (req, res, next) => {
               allActivities[i].eventMeetingType = activityData[i][19];
               allActivities[i].sectionMeetingType = activityData[i][20];
               allActivities[i].roomId = activityData[i][21];
+              if (i == allActivities.length-1){
+                conflictstr += allActivities[i].roomId;
+              }
+              else {conflictstr += allActivities[i].roomId+','; }
               allActivities[i].index = i;              
             }
             res.setHeader('Content-Type', 'application/json');

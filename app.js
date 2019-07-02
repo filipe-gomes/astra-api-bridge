@@ -8,6 +8,7 @@ var activitiesRouter = require('./routes/activities');
 var activityTypesRouter = require('./routes/activityTypes');
 var facilitiesRouter = require('./routes/facilities');
 
+
 var app = express();
 
 app.use(logger('dev'));
@@ -19,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/activities', activitiesRouter);
 app.use('/activity-types', activityTypesRouter);
-app.use('/facilities', facilitiesRouter)
+app.use('/facilities', facilitiesRouter);
+
 
 module.exports = app;

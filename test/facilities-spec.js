@@ -11,7 +11,7 @@ chai.use(chaiHttp);
 describe('/GET all campuses', () => {
   it('should GET all the campuses in friendly JSON', (done) => {
     chai.request(app)
-      .get('/facilities/campus')
+      .get('/facilities/campuslist')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
@@ -23,7 +23,7 @@ describe('/GET all campuses', () => {
 describe('/GET all buildings', () => {
   it('should GET all the buildings in friendly JSON', (done) => {
     chai.request(app)
-      .get('/facilities/buildings')
+      .get('/facilities/buildinglist')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
@@ -35,7 +35,7 @@ describe('/GET all buildings', () => {
 describe('/GET all rooms', () => {
   it('should GET all the rooms in friendly JSON', (done) => {
     chai.request(app)
-      .get('/facilities/rooms')
+      .get('/facilities/roomlist')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
