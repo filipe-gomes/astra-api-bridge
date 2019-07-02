@@ -5,6 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
+const QBget = require('../utility/queryBuilderGet');
 
 /**
  * @swagger
@@ -25,7 +26,21 @@ const camelCase = require('camelcase');
  *   get:
  *     tags:
  *       - activity-types
- *     description: Returns all event types
+ *     description: Returns a list of event types.  Valid filter parameters include having no filters, having a single filter value in both the filterfields and the filtervalues boxes (=), having the same number of values in each box (=), and having a single value in the filterfields box and many values in the filtervalues box ("in").
+ *     parameters:
+ *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -35,16 +50,19 @@ const camelCase = require('camelcase');
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/eventtypes', (req, res, next) => {
+  var qb = new QBget();
+  qb.addFields(['Id', 'Name']);
+  qb.sortOrder = 'Name';
+  qb.resulttype = 'List';
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activityTypesUrl = config.defaultApi.url + config.defaultApi.eventTypesEndpoint
-    +'_dc=1523226229268'
-    +'&fields=Id%2CName'
-    +'&_s=1'
-    +'&sortOrder=%2BName'
-    +'&page=1'
-    +'&start=0'
-    +'&limit=500';
+  +qb.toQueryString();
 
   const credentialData = {
     username: config.defaultApi.username,
@@ -100,7 +118,21 @@ router.get('/eventtypes', (req, res, next) => {
  *   get:
  *     tags:
  *       - activity-types
- *     description: Returns all event meeting types
+ *     description: Returns a list of event meeting types.  Valid filter parameters include having no filters, having a single filter value in both the filterfields and the filtervalues boxes (=), having the same number of values in each box (=), and having a single value in the filterfields box and many values in the filtervalues box ("in").
+ *     parameters:
+ *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -110,16 +142,19 @@ router.get('/eventtypes', (req, res, next) => {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/eventmeetingtypes', (req, res, next) => {
+  var qb = new QBget();
+  qb.addFields(['Id', 'Name']);
+  qb.sortOrder = 'Name';
+  qb.resulttype = 'List';
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activityTypesUrl = config.defaultApi.url + config.defaultApi.eventMeetingTypesEndpoint
-    +'_dc=1523226229268'
-    +'&fields=Id%2CName'
-    +'&_s=1'
-    +'&sortOrder=%2BName'
-    +'&page=1'
-    +'&start=0'
-    +'&limit=500';
+    +qb.toQueryString();
 
   const credentialData = {
     username: config.defaultApi.username,
@@ -175,7 +210,21 @@ router.get('/eventmeetingtypes', (req, res, next) => {
  *   get:
  *     tags:
  *       - activity-types
- *     description: Returns all section meeting types
+ *     description: Returns a list of section meeting types.  Valid filter parameters include having no filters, having a single filter value in both the filterfields and the filtervalues boxes (=), having the same number of values in each box (=), and having a single value in the filterfields box and many values in the filtervalues box ("in").
+ *     parameters:
+ *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -185,16 +234,19 @@ router.get('/eventmeetingtypes', (req, res, next) => {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/meetingtypes', (req, res, next) => {
+  var qb = new QBget();
+  qb.addFields(['Id', 'Name']);
+  qb.sortOrder = 'Name';
+  qb.resulttype = 'List';
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activityTypesUrl = config.defaultApi.url + config.defaultApi.meetingTypesEndpoint
-    +'_dc=1523226229268'
-    +'&fields=Id%2CName'
-    +'&_s=1'
-    +'&sortOrder=%2BName'
-    +'&page=1'
-    +'&start=0'
-    +'&limit=500';
+    +qb.toQueryString();
 
   const credentialData = {
     username: config.defaultApi.username,

@@ -73,12 +73,10 @@ router.get('/campuslist', (req, res, next) => {
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filtervariable = '!=';
-    console.log(qb.filtervariable);
   };
    const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const campusUrl = config.defaultApi.url + config.defaultApi.campusEndpoint
     +qb.toQueryString();
-    console.log(campusUrl);
 
   const credentialData = {
     username: config.defaultApi.username,
@@ -145,6 +143,11 @@ router.get('/campuslist', (req, res, next) => {
  *         description: Create comma delimited string for multiple values
  *         in: query
  *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -160,7 +163,9 @@ router.get('/buildinglist', (req, res, next) => {
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
-
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const buildingsUrl = config.defaultApi.url + config.defaultApi.buildingsEndpoint
   +qb.toQueryString();
@@ -233,6 +238,11 @@ router.get('/buildinglist', (req, res, next) => {
  *         description: Create comma delimited string for multiple values
  *         in: query
  *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -250,7 +260,9 @@ router.get('/roomlist', (req, res, next) => {
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
-
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
     +qb.toQueryString();
@@ -315,7 +327,7 @@ router.get('/roomlist', (req, res, next) => {
  *   get:
  *     tags:
  *       - facilities
- *     description: Returns a list of rooms that do not include the conflicts entered
+ *     description: Returns a list of rooms that do not include the conflicts entered. Use with the findConflicts call to find available event space.
  *     parameters:
  *       - name: Conflicts
  *         description: A comma delimited list of Room Ids
@@ -333,7 +345,6 @@ router.get('/roomlist', (req, res, next) => {
  */
 router.get('/availroomslist', (req, res, next) => {
   const filterconflicts = req.query.Conflicts;
-  console.log(filterconflicts);
 
   var qb = new QBget();
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
@@ -345,7 +356,6 @@ router.get('/availroomslist', (req, res, next) => {
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
     +qb.toQueryString();
-    console.log(roomsUrl);
 
   const credentialData = {
     username: config.defaultApi.username,
