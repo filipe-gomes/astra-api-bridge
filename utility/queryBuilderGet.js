@@ -1,4 +1,5 @@
 "use strict";
+const moment = require('moment');
 
 module.exports = class QBGet {
     
@@ -13,11 +14,9 @@ module.exports = class QBGet {
         this._fields = [];
         this._filterfields = [];
         this._filtervalues = [];
-        this._datetimerange = '';
         this._startDate = '';
         this._endDate = '';
         this._filtervariable = '==';
-        this._typelimitation = '';
         this._usagelimitation = '';
     }
 
@@ -93,7 +92,7 @@ module.exports = class QBGet {
     }
 
     set startDate(date) {
-        this._startDate = date; 
+        this._startDate = moment(date).format('YYYY-MM-DDTHH:mm:ss');
     }
 
     get endDate() {
@@ -101,42 +100,7 @@ module.exports = class QBGet {
     }
 
     set endDate(date) {
-        this._endDate = date; 
-    }
-
-    get typelimitation() {
-        return this._typelimitation;
-    }
-
-    set typelimitation(string) {
-        if (string == "EventType"){
-            this._typelimitation = 'EventMeetingByActivityId.Event.EventType.Name';
-        }
-        else if (string == "EventMeetingType"){
-            this._typelimitation = 'EventMeetingByActivityId.EventMeetingType.Name';
-        }
-        else if (string == "SectionMeetingType"){
-            this._typelimitation = 'SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name';
-        }        
-        else {
-        this._typelimitation = string; 
-        }
-    }
-
-    get datetimerange() {
-        return this._datetimerange;
-    }
-
-    set datetimerange(string) {
-        if (string == "Date"){
-            this._datetimerange = 'EventMeetingByActivityId.Event.EventType.Name';
-        }
-        else if (string == "Time"){
-            this._datetimerange = 'EventMeetingByActivityId.EventMeetingType.Name';
-        }
-        else {
-        this._datetimerange = string; 
-        }
+        this._endDate = moment(date).format('YYYY-MM-DDTHH:mm:ss'); 
     }
 
     get usagelimitation() {
@@ -162,66 +126,76 @@ module.exports = class QBGet {
     toQueryString() {
         let query = '';
         query += '&fields=' + this._fields.join('%2C');
-        if (this._resulttype == "List"){
-            if (this._filterfields.length > 0) {
-                query += '&filter=(';
-                if (this._filterfields.length < this._filtervalues.length){
-                    var filt = this._filterfields[0].trim();
-                    if (this._filtervariable == '==') {
-                        query += filt+' in (';
-                        for (let i = 0; i < this._filtervalues.length; i++) {
-                            var valu = this._filtervalues[i].trim();
-                            if (this._filtervalues.length-1 == i){
-                                query += '"'+valu+'"))';
-                            }
-                            else {
-                                query += '"'+valu+'",';
-                            }
+        if (this._filterfields.length > 0) {
+            query += '&filter=(';
+            if (this._filterfields.length < this._filtervalues.length) {
+                var filt = this._filterfields[0].trim();
+                if (this._filtervariable == '==') {
+                    query += filt + ' in (';
+                    for (let i = 0; i < this._filtervalues.length; i++) {
+                        var valu = this._filtervalues[i].trim();
+                        if (this._filtervalues.length - 1 == i) {
+                            query += '"' + valu + '"))';
                         }
-                    }
-                    else {
-                        for (let i = 0; i < this._filtervalues.length; i++) {
-                            var valu = this._filtervalues[i].trim();
-                            if (this._filtervalues.length-1 == i){
-                                query += '('+filt+'!="'+valu+'"))';
-                            }
-                            else {
-                                query += '('+filt+'!="'+valu+'")%26%26';
-                            }
+                        else {
+                            query += '"' + valu + '",';
                         }
                     }
                 }
-                 else for (let i = 0; i < this._filterfields.length; i++) {
-                    var filt = this._filterfields[i].trim();
+                else {
+                    for (let i = 0; i < this._filtervalues.length; i++) {
+                        var valu = this._filtervalues[i].trim();
+                        if (this._filtervalues.length - 1 == i) {
+                            query += '(' + filt + '!="' + valu + '"))';
+                        }
+                        else {
+                            query += '(' + filt + '!="' + valu + '")%26%26';
+                        }
+                    }
+                }
+            }
+            else for (let i = 0; i < this._filterfields.length; i++) {
+                var filt = this._filterfields[i].trim();
+                if (this._filtervalues[i]) {
                     var valu = this._filtervalues[i].trim();
-                    if (this._filterfields.length-1 == i){
-                        query += '('+filt+this._filtervariable+'"'+valu+'"))';
-                    }
-                    else {
-                        query += '('+filt+this._filtervariable+'"'+valu+'")%26%26';
-                    }
+                }
+                if (this._filterfields.length - 1 == i) {
+                    query += '(' + filt + this._filtervariable + '"' + valu + '"))';
+                }
+                else {
+                    query += '(' + filt + this._filtervariable + '"' + valu + '")%26%26';
                 }
             }
-            else {}
         }
-        else if (this._resulttype == "RoomConflicts"){
-            if (this._filtervalues.length > 0) {
-                query += '&filter=(';
-                for (let i = 0; i < this._filtervalues.length; i++) {
-                    if (this._filtervalues.length-1 == i){
-                        query += '(Id!="'+this._filtervalues[i]+'"))';
-                    }
-                    else {
-                        query += '(Id!="'+this._filtervalues[i]+'")%26%26';
-                    }
-                }
+        if (this._resulttype == 'DateRange' & this._startDate >= "1900-01-01") {
+            if (this._filterfields.length == 0) {
+                query += '&filter=';
             }
-            else {}
-        } 
-
-         
-        query += '&allowUnlimitedResults='+ this._allowUnlimitedResults;
-        query += '&sortOrder='+this._sortOrder;
+            else {
+                query += '%26%26';
+            }
+            query += '((StartDateTime>%3D"' + this._startDate + '")';
+            if (this._endDate >= this._startDate) {
+                query += '%26%26(EndDateTime<%3D"' + this._endDate + '"))';
+            }
+            else {
+                query += ')';
+            }
+        }
+        else if (this._resulttype == 'Conflicts' & this._startDate >= "1900-01-01") {
+            if (this._filterfields.length == 0) {
+                query += '&filter=';
+            }
+            else {
+                query += '%26%26';
+            }
+            query += '(((StartDateTime<%3D"' + this._endDate + '")';
+            query += '%26%26(EndDateTime>%3D"' + this._startDate + '"))';
+            query += '%7C%7C((StartDateTime>%3D"' + this._startDate + '")';
+            query += '%26%26(StartDateTime<%3D"' + this._endDate + '")))';
+        }
+        query += '&allowUnlimitedResults=' + this._allowUnlimitedResults;
+        query += '&sortOrder=' + this._sortOrder;
         query += '&page=' + this._page;
         query += '&start=' + this._startIndex;
         query += '&limit=' + this._limit;
@@ -229,7 +203,7 @@ module.exports = class QBGet {
         query = query.replace(/\:/g, '%3A');
         return query;
 
-        
+
     }
 
 }

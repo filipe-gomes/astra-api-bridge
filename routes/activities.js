@@ -5,7 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
-const QueryBuilder = require('../utility/queryBuilder');
+const QBget = require('../utility/queryBuilderGet');
 
 {/**swagger def
  * @swagger
@@ -51,11 +51,11 @@ const QueryBuilder = require('../utility/queryBuilder');
  *         type: string
  */
 
-    // todo add some of the other fields below:
-    //qb.addFields([Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
-    //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
-    //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
-    //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+  // todo add some of the other fields below:
+  //qb.addFields([Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
+  //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
+  //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+  //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
 }
 
 /**
@@ -81,32 +81,26 @@ const QueryBuilder = require('../utility/queryBuilder');
  *           $ref: '#/definitions/Activity'
  */
 router.get('/all', (req, res, next) => {
+  const activitycat = req.query.activitycategory;
+
+  var qb = new QBget();
+  qb.resulttype = 'List';
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  if (activitycat != 'All') {
+    qb.addFilterField('ActivityTypeCode');
+    qb.addFilterValue('1');
+    if (activitycat == 'Events') { qb.filtervariable = '!='; };
+  }
+  qb.sortOrder = 'StartDateTime';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-  const activitycat = req.query.activitycategory;
-  let withfilter = '';
-  if (activitycat == 'Academics'){
-    withfilter += '&filter=(ActivityTypeCode==1)';
-  }else if (activitycat == 'Events'){
-    withfilter += '&filter=(ActivityTypeCode!=1)';
-  };
-  withfilter +='&entityProps='+'&_s=1'+'&sortOrder=StartDateTime'+'&page=1'
-    +'&start=0'
-    +'&sort=%5B%7B%22property%22%3A%22StartDateTime%22%2C%22direction%22%3A%22ASC%22%7D%5D';
-  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
-    +'_dc=1523226229268'
-    +'&allowUnlimitedResults=true'
-    +'&fields=ActivityId%2CActivityName%2CStartDate%2CActivityTypeCode%2CCampusName%2CBuildingCode'
-    +'%2CRoomNumber%2CLocationName%2CStartDateTime%2CEndDateTime'
-    +'%2CInstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)'
-    +'%2CDays%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)'
-    +'%2CCanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)'
-    +'%2CSectionId%2CEventId'
-    +'%2CEventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)'
-    +'%2CParentActivityId%2CParentActivityName'
-    +'%2CEventMeetingByActivityId.Event.EventType.Name%2CEventMeetingByActivityId.EventMeetingType.Name'
-    +'%2CSectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name%2CLocation.RoomId'
-    +withfilter;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint + qb.toQueryString();
+
   const credentialData = {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
@@ -116,15 +110,15 @@ router.get('/all', (req, res, next) => {
   const cookieJar = new tough.CookieJar();
 
   axios.post(logonUrl, credentialData, {
-      jar: cookieJar,
-      headers: {
-        withCredentials: true,
-      }
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
   }).then(function (response) {
     if (response.data !== true) {
       res.sendStatus(401);
     }
-    cookieJar.store.getAllCookies(function(err, cookies) {
+    cookieJar.store.getAllCookies(function (err, cookies) {
       if (cookies === undefined) {
         res.send('failed to get cookies after login');
       } else {
@@ -134,8 +128,6 @@ router.get('/all', (req, res, next) => {
             cookie: cookies.join('; ')
           }
         }).then(function (response) {
-// this doesn't work because of the strjoin array fields          
-//          let fieldList = response.data.fields.split(",");
           let activityData = response.data.data;
           let allActivities = [];
           for (let i = 0; i < activityData.length; i++) {
@@ -153,20 +145,16 @@ router.get('/all', (req, res, next) => {
             allActivities[i].instructorName = activityData[i][10];
             allActivities[i].days = activityData[i][11];
             allActivities[i].canView = activityData[i][12];
-//            allActivities[i].sectionId = activityData[i][13];
-//            allActivities[i].eventId = activityData[i][14];
-//            allActivities[i].eventImage = activityData[i][15];
-//            allActivities[i].parentactivityId = activityData[i][16];
-//            allActivities[i].parentactivityName = activityData[i][17];
+            allActivities[i].sectionId = activityData[i][13];
+            allActivities[i].eventId = activityData[i][14];
+            allActivities[i].eventImage = activityData[i][15];
+            allActivities[i].parentactivityId = activityData[i][16];
+            allActivities[i].parentactivityName = activityData[i][17];
             allActivities[i].eventType = activityData[i][18];
             allActivities[i].eventMeetingType = activityData[i][19];
             allActivities[i].sectionMeetingType = activityData[i][20];
             allActivities[i].roomId = activityData[i][21]
             allActivities[i].index = i;
-           
-//            for (let j = 0; j < fieldList.length; j++) {
-//              allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
-//            }
           }
           res.setHeader('Content-Type', 'application/json');
           res.send(allActivities);
@@ -176,9 +164,9 @@ router.get('/all', (req, res, next) => {
       }
     });
   })
-  .catch(function (error) {
-    res.send('respond with a resource - error ' + error);
-  });
+    .catch(function (error) {
+      res.send('respond with a resource - error ' + error);
+    });
 });
 
 /**
@@ -192,13 +180,13 @@ router.get('/all', (req, res, next) => {
  *       - name: start
  *         description: The beginning date for a range search (inclusive)
  *         in: query
- *         required: true
+ *         required: false
  *         type: string
  *         format: date
  *       - name: end
  *         description: The end date for a range search (inclusive)
  *         in: query
- *         required: true
+ *         required: false
  *         type: string
  *         format: date
  *     produces:
@@ -212,99 +200,93 @@ router.get('/all', (req, res, next) => {
 router.get('/findByDateRange', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
-  
-    var qb = new QueryBuilder();
-    qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode']);
-    qb.addFields(['CampusName', 'BuildingCode', 'RoomNumber', 'LocationName']);
-    qb.addFields(['StartDateTime', 'EndDateTime']);
-    qb.addFields(['InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['SectionId', 'EventId']);
-    qb.addFields(['EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['ParentActivityId', 'ParentActivityName']);
-    qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name'])
-    qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
-    qb.sortOrder = 'StartDateTime';
-    qb.filterfield = 'StartDate';
-    qb.filtervalue = '';
+
+  var qb = new QBget();
+  qb.resulttype = 'DateRange';
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  qb.sortOrder = 'StartDateTime';
+  if (filterStartDate){
     qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
     qb.endDate = filterEndDate;
+  };
 
-  if (filterStartDate && filterEndDate) {
-    const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-    const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
-      + qb.toQueryString();
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+    + qb.toQueryString();
 
-    const credentialData = {
-      username: config.defaultApi.username,
-      password: config.defaultApi.password,
-    };
+  const credentialData = {
+    username: config.defaultApi.username,
+    password: config.defaultApi.password,
+  };
 
-    axiosCookieJarSupport(axios);
-    const cookieJar = new tough.CookieJar();
+  axiosCookieJarSupport(axios);
+  const cookieJar = new tough.CookieJar();
 
-    axios.post(logonUrl, credentialData, {
-        jar: cookieJar,
-        headers: {
-          withCredentials: true,
-        }
-    }).then(function (response) {
-      if (response.data !== true) {
-        res.sendStatus(401);
+  axios.post(logonUrl, credentialData, {
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
+  }).then(function (response) {
+    if (response.data !== true) {
+      res.sendStatus(401);
+    }
+    cookieJar.store.getAllCookies(function (err, cookies) {
+      if (cookies === undefined) {
+        res.send('failed to get cookies after login');
+      } else {
+        axios.get(activitiesUrl, {
+          jar: cookieJar,
+          headers: {
+            cookie: cookies.join('; ')
+          }
+        }).then(function (response) {
+          let activityData = response.data.data;
+          let allActivities = [];
+          for (let i = 0; i < activityData.length; i++) {
+            allActivities[i] = {};
+            allActivities[i].activityId = activityData[i][0];
+            allActivities[i].activityName = activityData[i][1];
+            allActivities[i].startDate = activityData[i][2];
+            allActivities[i].activityTypeCode = activityData[i][3];
+            allActivities[i].campusName = activityData[i][4];
+            allActivities[i].buildingCode = activityData[i][5];
+            allActivities[i].roomNumber = activityData[i][6];
+            allActivities[i].locationName = activityData[i][7];
+            allActivities[i].startDateTime = activityData[i][8];
+            allActivities[i].endDateTime = activityData[i][9];
+            allActivities[i].instructorName = activityData[i][10];
+            allActivities[i].days = activityData[i][11];
+            allActivities[i].canView = activityData[i][12];
+            allActivities[i].sectionId = activityData[i][13];
+            allActivities[i].eventId = activityData[i][14];
+            allActivities[i].eventImage = activityData[i][15];
+            allActivities[i].parentactivityId = activityData[i][16];
+            allActivities[i].parentactivityName = activityData[i][17];
+            allActivities[i].eventType = activityData[i][18];
+            allActivities[i].eventMeetingType = activityData[i][19];
+            allActivities[i].sectionMeetingType = activityData[i][20];
+            allActivities[i].roomId = activityData[i][21];
+            allActivities[i].index = i;
+          }
+          res.setHeader('Content-Type', 'application/json');
+          res.send(allActivities);
+        }).catch(function (error) {
+          res.send('respond with a resource - error ' + error);
+        });
       }
-      cookieJar.store.getAllCookies(function(err, cookies) {
-        if (cookies === undefined) {
-          res.send('failed to get cookies after login');
-        } else {
-          axios.get(activitiesUrl, {
-            jar: cookieJar,
-            headers: {
-              cookie: cookies.join('; ')
-            }
-          }).then(function (response) {
-            let activityData = response.data.data;
-            let allActivities = [];
-            for (let i = 0; i < activityData.length; i++) {
-              allActivities[i] = {};
-              allActivities[i].activityId = activityData[i][0];
-              allActivities[i].activityName = activityData[i][1];
-              allActivities[i].startDate = activityData[i][2];
-              allActivities[i].activityTypeCode = activityData[i][3];
-              allActivities[i].campusName = activityData[i][4];
-              allActivities[i].buildingCode = activityData[i][5];
-              allActivities[i].roomNumber = activityData[i][6];
-              allActivities[i].locationName = activityData[i][7];
-              allActivities[i].startDateTime = activityData[i][8];
-              allActivities[i].endDateTime = activityData[i][9];
-              allActivities[i].instructorName = activityData[i][10];
-              allActivities[i].days = activityData[i][11];
-              allActivities[i].canView = activityData[i][12];
-  //            allActivities[i].sectionId = activityData[i][13];
-  //            allActivities[i].eventId = activityData[i][14];
-  //            allActivities[i].eventImage = activityData[i][15];
-  //            allActivities[i].parentactivityId = activityData[i][16];
-  //            allActivities[i].parentactivityName = activityData[i][17];
-              allActivities[i].eventType = activityData[i][18];
-              allActivities[i].eventMeetingType = activityData[i][19];
-              allActivities[i].sectionMeetingType = activityData[i][20];
-              allActivities[i].roomId = activityData[i][21];
-              allActivities[i].index = i;              
-            }
-            res.setHeader('Content-Type', 'application/json');
-            res.send(allActivities);
-          }).catch(function (error) {
-            res.send('respond with a resource - error ' + error);
-          });
-        }
-      });
-    })
+    });
+  })
     .catch(function (error) {
       res.send('respond with a resource - error ' + error);
     });
-  } else {
-    res.send('invalid parameters');
-  }
 });
 
 /**
@@ -351,99 +333,101 @@ router.get('/filterbyActivityType', (req, res, next) => {
   const filterEndDate = req.query.end;
   const filterActivityType = req.query.activitytype;
   const filterTypeName = req.query.typename;
-  
-    var qb = new QueryBuilder();
-    qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode']);
-    qb.addFields(['CampusName', 'BuildingCode', 'RoomNumber', 'LocationName']);
-    qb.addFields(['StartDateTime', 'EndDateTime']);
-    qb.addFields(['InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['SectionId', 'EventId']);
-    qb.addFields(['EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['ParentActivityId', 'ParentActivityName']);
-    qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name']);
-    qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
-    qb.sortOrder = 'StartDateTime';
-    qb.filterfield = filterActivityType;
-    qb.filtervalue = filterTypeName;
+
+  var qb = new QBget();
+  qb.resulttype = 'DateRange';
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  qb.sortOrder = 'StartDateTime';
+  if (filterStartDate){
     qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
     qb.endDate = filterEndDate;
+  };
+  if (filterActivityType == 'EventType') {
+    qb.addFilterField('EventMeetingByActivityId.Event.EventType.Name');
+  } else if (filterActivityType == 'EventMeetingType') {
+    qb.addFilterField('EventMeetingByActivityId.EventMeetingType.Name');
+  } else {
+    qb.addFilterField('SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name');
+  }
+  qb.addFilterValue(filterTypeName);
 
-if (filterStartDate && filterEndDate) {
-    const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-    const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
-      + qb.toQueryString();
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+    + qb.toQueryString();
 
-    const credentialData = {
-      username: config.defaultApi.username,
-      password: config.defaultApi.password,
-    };
+  const credentialData = {
+    username: config.defaultApi.username,
+    password: config.defaultApi.password,
+  };
 
-    axiosCookieJarSupport(axios);
-    const cookieJar = new tough.CookieJar();
+  axiosCookieJarSupport(axios);
+  const cookieJar = new tough.CookieJar();
 
-    axios.post(logonUrl, credentialData, {
-        jar: cookieJar,
-        headers: {
-          withCredentials: true,
-        }
-    }).then(function (response) {
-      if (response.data !== true) {
-        res.sendStatus(401);
+  axios.post(logonUrl, credentialData, {
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
+  }).then(function (response) {
+    if (response.data !== true) {
+      res.sendStatus(401);
+    }
+    cookieJar.store.getAllCookies(function (err, cookies) {
+      if (cookies === undefined) {
+        res.send('failed to get cookies after login');
+      } else {
+        axios.get(activitiesUrl, {
+          jar: cookieJar,
+          headers: {
+            cookie: cookies.join('; ')
+          }
+        }).then(function (response) {
+          let activityData = response.data.data;
+          let allActivities = [];
+          for (let i = 0; i < activityData.length; i++) {
+            allActivities[i] = {}
+            allActivities[i].activityId = activityData[i][0];
+            allActivities[i].activityName = activityData[i][1];
+            allActivities[i].startDate = activityData[i][2];
+            allActivities[i].activityTypeCode = activityData[i][3];
+            allActivities[i].campusName = activityData[i][4];
+            allActivities[i].buildingCode = activityData[i][5];
+            allActivities[i].roomNumber = activityData[i][6];
+            allActivities[i].locationName = activityData[i][7];
+            allActivities[i].startDateTime = activityData[i][8];
+            allActivities[i].endDateTime = activityData[i][9];
+            allActivities[i].instructorName = activityData[i][10];
+            allActivities[i].days = activityData[i][11];
+            allActivities[i].canView = activityData[i][12];
+            allActivities[i].sectionId = activityData[i][13];
+            allActivities[i].eventId = activityData[i][14];
+            allActivities[i].eventImage = activityData[i][15];
+            allActivities[i].parentactivityId = activityData[i][16];
+            allActivities[i].parentactivityName = activityData[i][17];
+            allActivities[i].eventType = activityData[i][18];
+            allActivities[i].eventMeetingType = activityData[i][19];
+            allActivities[i].sectionMeetingType = activityData[i][20];
+            allActivities[i].roomId = activityData[i][21];
+            allActivities[i].index = i;
+          }
+          res.setHeader('Content-Type', 'application/json');
+          res.send(allActivities);
+        }).catch(function (error) {
+          res.send('respond with a resource - error ' + error);
+        });
       }
-      cookieJar.store.getAllCookies(function(err, cookies) {
-        if (cookies === undefined) {
-          res.send('failed to get cookies after login');
-        } else {
-          axios.get(activitiesUrl, {
-            jar: cookieJar,
-            headers: {
-              cookie: cookies.join('; ')
-            }
-          }).then(function (response) {
-            let activityData = response.data.data;
-            let allActivities = [];
-            for (let i = 0; i < activityData.length; i++) {
-              allActivities[i] = {}
-              allActivities[i].activityId = activityData[i][0];
-              allActivities[i].activityName = activityData[i][1];
-              allActivities[i].startDate = activityData[i][2];
-              allActivities[i].activityTypeCode = activityData[i][3];
-              allActivities[i].campusName = activityData[i][4];
-              allActivities[i].buildingCode = activityData[i][5];
-              allActivities[i].roomNumber = activityData[i][6];
-              allActivities[i].locationName = activityData[i][7];
-              allActivities[i].startDateTime = activityData[i][8];
-              allActivities[i].endDateTime = activityData[i][9];
-              allActivities[i].instructorName = activityData[i][10];
-              allActivities[i].days = activityData[i][11];
-              allActivities[i].canView = activityData[i][12];
-  //            allActivities[i].sectionId = activityData[i][13];
-  //            allActivities[i].eventId = activityData[i][14];
-  //            allActivities[i].eventImage = activityData[i][15];
-  //            allActivities[i].parentactivityId = activityData[i][16];
-  //            allActivities[i].parentactivityName = activityData[i][17];
-              allActivities[i].eventType = activityData[i][18];
-              allActivities[i].eventMeetingType = activityData[i][19];
-              allActivities[i].sectionMeetingType = activityData[i][20];
-              allActivities[i].roomId = activityData[i][21];
-              allActivities[i].index = i;              
-            }
-            res.setHeader('Content-Type', 'application/json');
-            res.send(allActivities);
-          }).catch(function (error) {
-            res.send('respond with a resource - error ' + error);
-          });
-        }
-      });
-    })
+    });
+  })
     .catch(function (error) {
       res.send('respond with a resource - error ' + error);
     });
-  } else {
-    res.send('invalid parameters');
-  }
 });
 
 /**
@@ -477,29 +461,26 @@ if (filterStartDate && filterEndDate) {
 router.get('/findConflicts', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
-  
-    var qb = new QueryBuilder();
-    qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode']);
-    qb.addFields(['CampusName', 'BuildingCode', 'RoomNumber', 'LocationName']);
-    qb.addFields(['StartDateTime', 'EndDateTime']);
-    qb.addFields(['InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['SectionId', 'EventId']);
-    qb.addFields(['EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['ParentActivityId', 'ParentActivityName']);
-    qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name'])
-    qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
-    qb.sortOrder = 'StartDateTime';
-    qb.filterfield = 'StartTime';
-    qb.filtervalue = '';
-    qb.startDate = filterStartDate;
-    qb.endDate = filterEndDate;
 
-  if (filterStartDate && filterEndDate) {
-    const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-    const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
-      + qb.toQueryString();
+  var qb = new QBget();
+  qb.resulttype = 'Conflicts';
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  qb.sortOrder = 'StartDateTime';
+  if (filterStartDate){
+    qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
+    qb.endDate = filterEndDate;
+  };
+
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+    + qb.toQueryString();
 
     const credentialData = {
       username: config.defaultApi.username,
@@ -510,15 +491,15 @@ router.get('/findConflicts', (req, res, next) => {
     const cookieJar = new tough.CookieJar();
 
     axios.post(logonUrl, credentialData, {
-        jar: cookieJar,
-        headers: {
-          withCredentials: true,
-        }
+      jar: cookieJar,
+      headers: {
+        withCredentials: true,
+      }
     }).then(function (response) {
       if (response.data !== true) {
         res.sendStatus(401);
       }
-      cookieJar.store.getAllCookies(function(err, cookies) {
+      cookieJar.store.getAllCookies(function (err, cookies) {
         if (cookies === undefined) {
           res.send('failed to get cookies after login');
         } else {
@@ -529,7 +510,6 @@ router.get('/findConflicts', (req, res, next) => {
             }
           }).then(function (response) {
             let activityData = response.data.data;
-            let conflictstr = '';
             let allActivities = [];
             for (let i = 0; i < activityData.length; i++) {
               allActivities[i] = {};
@@ -546,20 +526,16 @@ router.get('/findConflicts', (req, res, next) => {
               allActivities[i].instructorName = activityData[i][10];
               allActivities[i].days = activityData[i][11];
               allActivities[i].canView = activityData[i][12];
-  //            allActivities[i].sectionId = activityData[i][13];
-  //            allActivities[i].eventId = activityData[i][14];
-  //            allActivities[i].eventImage = activityData[i][15];
-  //            allActivities[i].parentactivityId = activityData[i][16];
-  //            allActivities[i].parentactivityName = activityData[i][17];
+              allActivities[i].sectionId = activityData[i][13];
+              allActivities[i].eventId = activityData[i][14];
+              allActivities[i].eventImage = activityData[i][15];
+              allActivities[i].parentactivityId = activityData[i][16];
+              allActivities[i].parentactivityName = activityData[i][17];
               allActivities[i].eventType = activityData[i][18];
               allActivities[i].eventMeetingType = activityData[i][19];
               allActivities[i].sectionMeetingType = activityData[i][20];
               allActivities[i].roomId = activityData[i][21];
-              if (i == allActivities.length-1){
-                conflictstr += allActivities[i].roomId;
-              }
-              else {conflictstr += allActivities[i].roomId+','; }
-              allActivities[i].index = i;              
+              allActivities[i].index = i;
             }
             res.setHeader('Content-Type', 'application/json');
             res.send(allActivities);
@@ -569,12 +545,9 @@ router.get('/findConflicts', (req, res, next) => {
         }
       });
     })
-    .catch(function (error) {
-      res.send('respond with a resource - error ' + error);
-    });
-  } else {
-    res.send('invalid parameters');
-  }
+      .catch(function (error) {
+        res.send('respond with a resource - error ' + error);
+      });
 });
 
 /**
@@ -615,31 +588,27 @@ router.get('/findroomConflicts', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
   const filterRoomId = req.query.roomId;
-  
-    var qb = new QueryBuilder();
-    qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode']);
-    qb.addFields(['CampusName', 'BuildingCode', 'RoomNumber', 'LocationName']);
-    qb.addFields(['StartDateTime', 'EndDateTime']);
-    qb.addFields(['InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['SectionId', 'EventId']);
-    qb.addFields(['EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
-    qb.addFields(['ParentActivityId', 'ParentActivityName']);
-    qb.addFields(['EventMeetingByActivityId.Event.EventType.Name','EventMeetingByActivityId.EventMeetingType.Name'])
-    qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name','Location.RoomId']);
-    qb.sortOrder = '%2BStartDateTime';
-    if (filterRoomId){
-      qb.filterfield = 'StartTime,Room';
-      qb.filtervalue = filterRoomId;
-    }else{
-      qb.filterfield = 'StartTime';
-      qb.filtervalue = '';
-    }
-    qb.startDate = filterStartDate;
-    qb.endDate = filterEndDate;
 
-  if (filterStartDate && filterEndDate) {
+  var qb = new QBget();
+  qb.resulttype = 'Conflicts';
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  qb.sortOrder = 'StartDateTime';
+  if (filterStartDate){
+    qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
+    qb.endDate = filterEndDate;
+  };
+  if (filterRoomId) {
+    qb.addFilterField('Location.RoomId');
+    qb.addFilterValue(filterRoomId);
+  } 
+
     const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
     const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
       + qb.toQueryString();
@@ -653,15 +622,15 @@ router.get('/findroomConflicts', (req, res, next) => {
     const cookieJar = new tough.CookieJar();
 
     axios.post(logonUrl, credentialData, {
-        jar: cookieJar,
-        headers: {
-          withCredentials: true,
-        }
+      jar: cookieJar,
+      headers: {
+        withCredentials: true,
+      }
     }).then(function (response) {
       if (response.data !== true) {
         res.sendStatus(401);
       }
-      cookieJar.store.getAllCookies(function(err, cookies) {
+      cookieJar.store.getAllCookies(function (err, cookies) {
         if (cookies === undefined) {
           res.send('failed to get cookies after login');
         } else {
@@ -688,16 +657,16 @@ router.get('/findroomConflicts', (req, res, next) => {
               allActivities[i].instructorName = activityData[i][10];
               allActivities[i].days = activityData[i][11];
               allActivities[i].canView = activityData[i][12];
-  //            allActivities[i].sectionId = activityData[i][13];
-  //            allActivities[i].eventId = activityData[i][14];
-  //            allActivities[i].eventImage = activityData[i][15];
-  //            allActivities[i].parentactivityId = activityData[i][16];
-  //            allActivities[i].parentactivityName = activityData[i][17];
+              allActivities[i].sectionId = activityData[i][13];
+              allActivities[i].eventId = activityData[i][14];
+              allActivities[i].eventImage = activityData[i][15];
+              allActivities[i].parentactivityId = activityData[i][16];
+              allActivities[i].parentactivityName = activityData[i][17];
               allActivities[i].eventType = activityData[i][18];
               allActivities[i].eventMeetingType = activityData[i][19];
               allActivities[i].sectionMeetingType = activityData[i][20];
               allActivities[i].roomId = activityData[i][21];
-              allActivities[i].index = i;              
+              allActivities[i].index = i;
             }
             res.setHeader('Content-Type', 'application/json');
             res.send(allActivities);
@@ -707,12 +676,9 @@ router.get('/findroomConflicts', (req, res, next) => {
         }
       });
     })
-    .catch(function (error) {
-      res.send('respond with a resource - error ' + error);
-    });
-  } else {
-    res.send('invalid parameters');
-  }
+      .catch(function (error) {
+        res.send('respond with a resource - error ' + error);
+      });
 });
 
 module.exports = router;

@@ -74,7 +74,7 @@ router.get('/campuslist', (req, res, next) => {
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filtervariable = '!=';
   };
-   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const campusUrl = config.defaultApi.url + config.defaultApi.campusEndpoint
     +qb.toQueryString();
 
@@ -350,8 +350,9 @@ router.get('/availroomslist', (req, res, next) => {
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sortOrder = '%2BBuilding.Name,Name';
-  qb.resulttype = 'RoomConflicts';
+  qb.addFilterField('Id');
   qb.addFilterValue(filterconflicts);
+  qb.filtervariable = '!=';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
