@@ -58,19 +58,63 @@ const QBget = require('../utility/queryBuilderGet');
   //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
 }
 
+function createresultlist(activityData) {
+  let resultlist = [];
+  for (let i = 0; i < activityData.length; i++) {
+    resultlist[i] = {};
+    resultlist[i].activityId = activityData[i][0];
+    resultlist[i].activityName = activityData[i][1];
+    resultlist[i].startDate = activityData[i][2];
+    resultlist[i].activityTypeCode = activityData[i][3];
+    resultlist[i].campusName = activityData[i][4];
+    resultlist[i].buildingCode = activityData[i][5];
+    resultlist[i].roomNumber = activityData[i][6];
+    resultlist[i].locationName = activityData[i][7];
+    resultlist[i].startDateTime = activityData[i][8];
+    resultlist[i].endDateTime = activityData[i][9];
+    resultlist[i].instructorName = activityData[i][10];
+    resultlist[i].days = activityData[i][11];
+    resultlist[i].canView = activityData[i][12];
+    resultlist[i].sectionId = activityData[i][13];
+    resultlist[i].eventId = activityData[i][14];
+    resultlist[i].eventImage = activityData[i][15];
+    resultlist[i].parentactivityId = activityData[i][16];
+    resultlist[i].parentactivityName = activityData[i][17];
+    resultlist[i].eventType = activityData[i][18];
+    resultlist[i].eventMeetingType = activityData[i][19];
+    resultlist[i].sectionMeetingType = activityData[i][20];
+    resultlist[i].roomId = activityData[i][21]
+    resultlist[i].index = i;
+  }
+return resultlist;
+}
+
 /**
  * @swagger
  * /activities/all:
  *   get:
  *     tags:
  *       - activities
- *     description: Returns all activities
+ *     description: Returns all activities, optional filter by type
  *     parameters:
  *       - name: activitycategory
  *         description: Select an activity category filter
  *         in: query
  *         enum: ["All","Academics","Events"]
  *         required: true
+ *         type: string 
+ *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
  *         type: string 
  *     produces:
  *       - application/json
@@ -84,6 +128,7 @@ router.get('/all', (req, res, next) => {
   const activitycat = req.query.activitycategory;
 
   var qb = new QBget();
+  qb.entity = 'activityList';
   qb.resulttype = 'List';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -91,12 +136,18 @@ router.get('/all', (req, res, next) => {
   qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
   qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
   if (activitycat != 'All') {
     qb.addFilterField('ActivityTypeCode');
     qb.addFilterValue('1');
     if (activitycat == 'Events') { qb.filtervariable = '!='; };
   }
-  qb.sortOrder = 'StartDateTime';
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
+  qb.sort = 'StartDateTime';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint + qb.toQueryString();
@@ -129,35 +180,9 @@ router.get('/all', (req, res, next) => {
           }
         }).then(function (response) {
           let activityData = response.data.data;
-          let allActivities = [];
-          for (let i = 0; i < activityData.length; i++) {
-            allActivities[i] = {};
-            allActivities[i].activityId = activityData[i][0];
-            allActivities[i].activityName = activityData[i][1];
-            allActivities[i].startDate = activityData[i][2];
-            allActivities[i].activityTypeCode = activityData[i][3];
-            allActivities[i].campusName = activityData[i][4];
-            allActivities[i].buildingCode = activityData[i][5];
-            allActivities[i].roomNumber = activityData[i][6];
-            allActivities[i].locationName = activityData[i][7];
-            allActivities[i].startDateTime = activityData[i][8];
-            allActivities[i].endDateTime = activityData[i][9];
-            allActivities[i].instructorName = activityData[i][10];
-            allActivities[i].days = activityData[i][11];
-            allActivities[i].canView = activityData[i][12];
-            allActivities[i].sectionId = activityData[i][13];
-            allActivities[i].eventId = activityData[i][14];
-            allActivities[i].eventImage = activityData[i][15];
-            allActivities[i].parentactivityId = activityData[i][16];
-            allActivities[i].parentactivityName = activityData[i][17];
-            allActivities[i].eventType = activityData[i][18];
-            allActivities[i].eventMeetingType = activityData[i][19];
-            allActivities[i].sectionMeetingType = activityData[i][20];
-            allActivities[i].roomId = activityData[i][21]
-            allActivities[i].index = i;
-          }
+          let myresults = createresultlist(activityData);
           res.setHeader('Content-Type', 'application/json');
-          res.send(allActivities);
+          res.send(myresults);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
@@ -189,6 +214,19 @@ router.get('/all', (req, res, next) => {
  *         required: false
  *         type: string
  *         format: date
+  *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -203,13 +241,20 @@ router.get('/findByDateRange', (req, res, next) => {
 
   var qb = new QBget();
   qb.resulttype = 'DateRange';
+  qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
   qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
-  qb.sortOrder = 'StartDateTime';
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
+  qb.sort = 'StartDateTime';
   if (filterStartDate){
     qb.startDate = filterStartDate;
   };
@@ -249,35 +294,9 @@ router.get('/findByDateRange', (req, res, next) => {
           }
         }).then(function (response) {
           let activityData = response.data.data;
-          let allActivities = [];
-          for (let i = 0; i < activityData.length; i++) {
-            allActivities[i] = {};
-            allActivities[i].activityId = activityData[i][0];
-            allActivities[i].activityName = activityData[i][1];
-            allActivities[i].startDate = activityData[i][2];
-            allActivities[i].activityTypeCode = activityData[i][3];
-            allActivities[i].campusName = activityData[i][4];
-            allActivities[i].buildingCode = activityData[i][5];
-            allActivities[i].roomNumber = activityData[i][6];
-            allActivities[i].locationName = activityData[i][7];
-            allActivities[i].startDateTime = activityData[i][8];
-            allActivities[i].endDateTime = activityData[i][9];
-            allActivities[i].instructorName = activityData[i][10];
-            allActivities[i].days = activityData[i][11];
-            allActivities[i].canView = activityData[i][12];
-            allActivities[i].sectionId = activityData[i][13];
-            allActivities[i].eventId = activityData[i][14];
-            allActivities[i].eventImage = activityData[i][15];
-            allActivities[i].parentactivityId = activityData[i][16];
-            allActivities[i].parentactivityName = activityData[i][17];
-            allActivities[i].eventType = activityData[i][18];
-            allActivities[i].eventMeetingType = activityData[i][19];
-            allActivities[i].sectionMeetingType = activityData[i][20];
-            allActivities[i].roomId = activityData[i][21];
-            allActivities[i].index = i;
-          }
+          let myresults = createresultlist(activityData);
           res.setHeader('Content-Type', 'application/json');
-          res.send(allActivities);
+          res.send(myresults);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
@@ -320,6 +339,19 @@ router.get('/findByDateRange', (req, res, next) => {
  *         in: query
  *         required: true
  *         type: string 
+ *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -336,13 +368,15 @@ router.get('/filterbyActivityType', (req, res, next) => {
 
   var qb = new QBget();
   qb.resulttype = 'DateRange';
+  qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
   qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
-  qb.sortOrder = 'StartDateTime';
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.sort = 'StartDateTime';
   if (filterStartDate){
     qb.startDate = filterStartDate;
   };
@@ -357,6 +391,11 @@ router.get('/filterbyActivityType', (req, res, next) => {
     qb.addFilterField('SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name');
   }
   qb.addFilterValue(filterTypeName);
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filtervariable = '!=';
+  };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
@@ -390,35 +429,9 @@ router.get('/filterbyActivityType', (req, res, next) => {
           }
         }).then(function (response) {
           let activityData = response.data.data;
-          let allActivities = [];
-          for (let i = 0; i < activityData.length; i++) {
-            allActivities[i] = {}
-            allActivities[i].activityId = activityData[i][0];
-            allActivities[i].activityName = activityData[i][1];
-            allActivities[i].startDate = activityData[i][2];
-            allActivities[i].activityTypeCode = activityData[i][3];
-            allActivities[i].campusName = activityData[i][4];
-            allActivities[i].buildingCode = activityData[i][5];
-            allActivities[i].roomNumber = activityData[i][6];
-            allActivities[i].locationName = activityData[i][7];
-            allActivities[i].startDateTime = activityData[i][8];
-            allActivities[i].endDateTime = activityData[i][9];
-            allActivities[i].instructorName = activityData[i][10];
-            allActivities[i].days = activityData[i][11];
-            allActivities[i].canView = activityData[i][12];
-            allActivities[i].sectionId = activityData[i][13];
-            allActivities[i].eventId = activityData[i][14];
-            allActivities[i].eventImage = activityData[i][15];
-            allActivities[i].parentactivityId = activityData[i][16];
-            allActivities[i].parentactivityName = activityData[i][17];
-            allActivities[i].eventType = activityData[i][18];
-            allActivities[i].eventMeetingType = activityData[i][19];
-            allActivities[i].sectionMeetingType = activityData[i][20];
-            allActivities[i].roomId = activityData[i][21];
-            allActivities[i].index = i;
-          }
+          let myresults = createresultlist(activityData);
           res.setHeader('Content-Type', 'application/json');
-          res.send(allActivities);
+          res.send(myresults);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
@@ -464,13 +477,15 @@ router.get('/findConflicts', (req, res, next) => {
 
   var qb = new QBget();
   qb.resulttype = 'Conflicts';
+  qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
   qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
-  qb.sortOrder = 'StartDateTime';
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.sort = 'StartDateTime';
   if (filterStartDate){
     qb.startDate = filterStartDate;
   };
@@ -510,35 +525,9 @@ router.get('/findConflicts', (req, res, next) => {
             }
           }).then(function (response) {
             let activityData = response.data.data;
-            let allActivities = [];
-            for (let i = 0; i < activityData.length; i++) {
-              allActivities[i] = {};
-              allActivities[i].activityId = activityData[i][0];
-              allActivities[i].activityName = activityData[i][1];
-              allActivities[i].startDate = activityData[i][2];
-              allActivities[i].activityTypeCode = activityData[i][3];
-              allActivities[i].campusName = activityData[i][4];
-              allActivities[i].buildingCode = activityData[i][5];
-              allActivities[i].roomNumber = activityData[i][6];
-              allActivities[i].locationName = activityData[i][7];
-              allActivities[i].startDateTime = activityData[i][8];
-              allActivities[i].endDateTime = activityData[i][9];
-              allActivities[i].instructorName = activityData[i][10];
-              allActivities[i].days = activityData[i][11];
-              allActivities[i].canView = activityData[i][12];
-              allActivities[i].sectionId = activityData[i][13];
-              allActivities[i].eventId = activityData[i][14];
-              allActivities[i].eventImage = activityData[i][15];
-              allActivities[i].parentactivityId = activityData[i][16];
-              allActivities[i].parentactivityName = activityData[i][17];
-              allActivities[i].eventType = activityData[i][18];
-              allActivities[i].eventMeetingType = activityData[i][19];
-              allActivities[i].sectionMeetingType = activityData[i][20];
-              allActivities[i].roomId = activityData[i][21];
-              allActivities[i].index = i;
-            }
+            let myresults = createresultlist(activityData);
             res.setHeader('Content-Type', 'application/json');
-            res.send(allActivities);
+            res.send(myresults);
           }).catch(function (error) {
             res.send('respond with a resource - error ' + error);
           });
@@ -590,6 +579,7 @@ router.get('/findroomConflicts', (req, res, next) => {
   const filterRoomId = req.query.roomId;
 
   var qb = new QBget();
+  qb.entity = 'activityList';
   qb.resulttype = 'Conflicts';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -597,7 +587,8 @@ router.get('/findroomConflicts', (req, res, next) => {
   qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
   qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
-  qb.sortOrder = 'StartDateTime';
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.sort = 'StartDateTime';
   if (filterStartDate){
     qb.startDate = filterStartDate;
   };
@@ -641,35 +632,9 @@ router.get('/findroomConflicts', (req, res, next) => {
             }
           }).then(function (response) {
             let activityData = response.data.data;
-            let allActivities = [];
-            for (let i = 0; i < activityData.length; i++) {
-              allActivities[i] = {};
-              allActivities[i].activityId = activityData[i][0];
-              allActivities[i].activityName = activityData[i][1];
-              allActivities[i].startDate = activityData[i][2];
-              allActivities[i].activityTypeCode = activityData[i][3];
-              allActivities[i].campusName = activityData[i][4];
-              allActivities[i].buildingCode = activityData[i][5];
-              allActivities[i].roomNumber = activityData[i][6];
-              allActivities[i].locationName = activityData[i][7];
-              allActivities[i].startDateTime = activityData[i][8];
-              allActivities[i].endDateTime = activityData[i][9];
-              allActivities[i].instructorName = activityData[i][10];
-              allActivities[i].days = activityData[i][11];
-              allActivities[i].canView = activityData[i][12];
-              allActivities[i].sectionId = activityData[i][13];
-              allActivities[i].eventId = activityData[i][14];
-              allActivities[i].eventImage = activityData[i][15];
-              allActivities[i].parentactivityId = activityData[i][16];
-              allActivities[i].parentactivityName = activityData[i][17];
-              allActivities[i].eventType = activityData[i][18];
-              allActivities[i].eventMeetingType = activityData[i][19];
-              allActivities[i].sectionMeetingType = activityData[i][20];
-              allActivities[i].roomId = activityData[i][21];
-              allActivities[i].index = i;
-            }
+            let myresults = createresultlist(activityData);
             res.setHeader('Content-Type', 'application/json');
-            res.send(allActivities);
+            res.send(myresults);
           }).catch(function (error) {
             res.send('respond with a resource - error ' + error);
           });
@@ -679,6 +644,88 @@ router.get('/findroomConflicts', (req, res, next) => {
       .catch(function (error) {
         res.send('respond with a resource - error ' + error);
       });
+});
+
+/**
+ * @swagger
+ * /activities/filtered:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns activities through the facade protocol while allowing the ability to create an advanced custom filter
+ *     parameters:
+ *       - name: advancedFilter
+ *         description: create an activitylist filter
+ *         in: query
+ *         required: false
+ *         type: string 
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
+router.get('/filtered', (req, res, next) => {
+  const advancedFilter = req.query.advancedFilter;
+
+  var qb = new QBget();
+  qb.resulttype = 'Advanced';
+  qb.entity = 'activityList';
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb._advancedFilter = advancedFilter;
+  qb.sort = 'StartDateTime';
+
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint + qb.toQueryString();
+
+  const credentialData = {
+    username: config.defaultApi.username,
+    password: config.defaultApi.password,
+  };
+
+  axiosCookieJarSupport(axios);
+  const cookieJar = new tough.CookieJar();
+
+  axios.post(logonUrl, credentialData, {
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
+  }).then(function (response) {
+    if (response.data !== true) {
+      res.sendStatus(401);
+    }
+    cookieJar.store.getAllCookies(function (err, cookies) {
+      if (cookies === undefined) {
+        res.send('failed to get cookies after login');
+      } else {
+        axios.get(activitiesUrl, {
+          jar: cookieJar,
+          headers: {
+            cookie: cookies.join('; ')
+          }
+        }).then(function (response) {
+          let activityData = response.data.data;
+          let myresults = createresultlist(activityData);
+          res.setHeader('Content-Type', 'application/json');
+          res.send(myresults);
+        }).catch(function (error) {
+          res.send('respond with a resource - error ' + error);
+        });
+      }
+    });
+  })
+    .catch(function (error) {
+      res.send('respond with a resource - error ' + error);
+    });
 });
 
 module.exports = router;

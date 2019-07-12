@@ -7,6 +7,7 @@ const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
 
+
 /**
  * @swagger
  * definition:
@@ -19,6 +20,17 @@ const QBget = require('../utility/queryBuilderGet');
  *       index:
  *         type: integer
  */
+
+function createresultlist(activityTypeData) {
+  let resultlist = [];
+  for (let i = 0; i < activityTypeData.length; i++) {
+    resultlist[i] = {};
+    resultlist[i].activityTypeId = activityTypeData[i][0];
+    resultlist[i].activityTypeName = activityTypeData[i][1];
+    resultlist[i].index = i;
+  }
+  return resultlist;
+}
 
 /**
  * @swagger
@@ -51,8 +63,9 @@ const QBget = require('../utility/queryBuilderGet');
  */
 router.get('/eventtypes', (req, res, next) => {
   var qb = new QBget();
-  qb.addFields(['Id', 'Name']);
-  qb.sortOrder = 'Name';
+  qb.entity = 'eventType';
+  qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
+  qb.sort = 'Name';
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
@@ -92,15 +105,9 @@ router.get('/eventtypes', (req, res, next) => {
           }
         }).then(function (response) {          
           let activityTypeData = response.data.data;
-          let allEventTypes = []; 
-          for (let i = 0; i < activityTypeData.length; i++) {
-            allEventTypes[i] = {};
-            allEventTypes[i].activityTypeId = activityTypeData[i][0];
-            allEventTypes[i].activityTypeName = activityTypeData[i][1];
-            allEventTypes[i].index = i;
-          }
+          let myresults = createresultlist(activityTypeData);
           res.setHeader('Content-Type', 'application/json');
-          res.send(allEventTypes);
+          res.send(myresults);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
@@ -143,8 +150,9 @@ router.get('/eventtypes', (req, res, next) => {
  */
 router.get('/eventmeetingtypes', (req, res, next) => {
   var qb = new QBget();
-  qb.addFields(['Id', 'Name']);
-  qb.sortOrder = 'Name';
+  qb.entity = 'eventMeetingType';
+  qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
+  qb.sort = 'Name';
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
@@ -184,15 +192,9 @@ router.get('/eventmeetingtypes', (req, res, next) => {
           }
         }).then(function (response) {          
           let activityTypeData = response.data.data;
-          let allEventMeetingTypes = []; 
-          for (let i = 0; i < activityTypeData.length; i++) {
-            allEventMeetingTypes[i] = {};
-            allEventMeetingTypes[i].activityTypeId = activityTypeData[i][0];
-            allEventMeetingTypes[i].activityTypeName = activityTypeData[i][1];
-            allEventMeetingTypes[i].index = i;
-          }
+          let myresults = createresultlist(activityTypeData);
           res.setHeader('Content-Type', 'application/json');
-          res.send(allEventMeetingTypes);
+          res.send(myresults);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
@@ -235,8 +237,9 @@ router.get('/eventmeetingtypes', (req, res, next) => {
  */
 router.get('/meetingtypes', (req, res, next) => {
   var qb = new QBget();
-  qb.addFields(['Id', 'Name']);
-  qb.sortOrder = 'Name';
+  qb.entity = 'meetingType';
+  qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
+  qb.sort = 'Name';
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
@@ -276,15 +279,9 @@ router.get('/meetingtypes', (req, res, next) => {
           }
         }).then(function (response) {          
           let activityTypeData = response.data.data;
-          let allMeetingTypes = []; 
-          for (let i = 0; i < activityTypeData.length; i++) {
-            allMeetingTypes[i] = {};
-            allMeetingTypes[i].activityTypeId = activityTypeData[i][0];
-            allMeetingTypes[i].activityTypeName = activityTypeData[i][1];
-            allMeetingTypes[i].index = i;
-          }
+          let myresults = createresultlist(activityTypeData);
           res.setHeader('Content-Type', 'application/json');
-          res.send(allMeetingTypes);
+          res.send(myresults);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });

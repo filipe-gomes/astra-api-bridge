@@ -66,8 +66,9 @@ const QBget = require('../utility/queryBuilderGet');
  */
 router.get('/campuslist', (req, res, next) => {
   var qb = new QBget();
+  qb.entity = 'campus';
   qb.addFields(['Id', 'Name', 'IsActive']);
-  qb.sortOrder = 'Name';
+  qb.sort = 'Name';
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
@@ -158,8 +159,9 @@ router.get('/campuslist', (req, res, next) => {
  */
 router.get('/buildinglist', (req, res, next) => {
   var qb = new QBget();
+  qb.entity = 'building';
   qb.addFields(['Id', 'Name', 'BuildingCode', 'Campus.Name','IsActive']);
-  qb.sortOrder = 'Campus.Name%2CName';
+  qb.sort = 'Campus.Name%2CName';
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
@@ -254,9 +256,10 @@ router.get('/buildinglist', (req, res, next) => {
 router.get('/roomlist', (req, res, next) => {
   
   var qb = new QBget();
+  qb.entity = 'room';
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
-  qb.sortOrder = '%2BBuilding.Name,Name';
+  qb.sort = '%2BBuilding.Name,Name';
   qb.resulttype = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
@@ -332,7 +335,7 @@ router.get('/roomlist', (req, res, next) => {
  *       - name: Conflicts
  *         description: A comma delimited list of Room Ids
  *         in: query
- *         required: false
+ *         required: True
  *         type: string 
  *         format: string
  *     produces:
@@ -347,9 +350,10 @@ router.get('/availroomslist', (req, res, next) => {
   const filterconflicts = req.query.Conflicts;
 
   var qb = new QBget();
+  qb.entity = 'room';
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
-  qb.sortOrder = '%2BBuilding.Name,Name';
+  qb.sort = '%2BBuilding.Name,Name';
   qb.addFilterField('Id');
   qb.addFilterValue(filterconflicts);
   qb.filtervariable = '!=';

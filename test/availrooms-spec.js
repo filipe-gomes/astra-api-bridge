@@ -10,8 +10,8 @@ chai.use(chaiHttp);
 const moment = require('moment');
 
 
-var cfirst = moment().startOf('month').format('YYYY-MM-DDT13:00:00');
-var clast = moment().startOf('month').format('YYYY-MM-DDT19:30:00');
+var cfirst = moment().format('YYYY-MM-DDT08:00:00');
+var clast = moment().format('YYYY-MM-DDT19:30:00');
 
 describe('/GET all conflicting activities by datetime range', () => {
   var conflicts = '';
@@ -34,7 +34,7 @@ describe('/GET all conflicting activities by datetime range', () => {
   }).timeout(15000);
   it('should GET all the rooms in friendly JSON', (done) => {
     chai.request(app)
-      .get('/facilities/availrooms?conflict='+conflicts)
+      .get('/facilities/availroomslist?Conflicts='+conflicts)
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
