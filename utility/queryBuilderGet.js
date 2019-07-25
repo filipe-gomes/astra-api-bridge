@@ -1,6 +1,8 @@
 "use strict";
 const moment = require('moment');
 
+// todo: add queryBuilderPost and basic calls
+
 
 function facfield(entityname, fieldname) {
     let entityfield = fieldname;

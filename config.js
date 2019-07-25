@@ -13,7 +13,9 @@ config.defaultApi = {
   "meetingTypesEndpoint": '~api/query/meetingType?',    
   "campusEndpoint": '~api/query/campus?',
   "buildingsEndpoint": '~api/query/building?',
-  "roomsEndpoint": '~api/query/room?'
+  "roomsEndpoint": '~api/query/room?',
+  "roleEndpoint": '~api/query/role?',
+  "permEndpoint": '~api/query/permission?'
 }
 
 module.exports = config;

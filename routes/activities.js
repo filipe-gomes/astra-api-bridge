@@ -56,6 +56,8 @@ const QBget = require('../utility/queryBuilderGet');
   //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
   //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
   //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+
+  // todo correct join calls in activity data
 }
 
 function createresultlist(activityData) {
@@ -156,7 +158,7 @@ router.get('/all', (req, res, next) => {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
   };
-
+  console.log(activitiesUrl);
   axiosCookieJarSupport(axios);
   const cookieJar = new tough.CookieJar();
 
