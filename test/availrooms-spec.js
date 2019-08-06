@@ -32,6 +32,7 @@ describe('/GET all conflicting activities by datetime range', () => {
         done();
       });
   }).timeout(15000);
+  
   it('should GET all the rooms in friendly JSON', (done) => {
     chai.request(app)
       .get('/facilities/availroomslist?Conflicts='+conflicts)
