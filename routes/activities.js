@@ -682,7 +682,7 @@ router.get('/filtered', (req, res, next) => {
   qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
   //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
-  qb._advancedFilter = advancedFilter;
+  qb.advancedFilter = advancedFilter;
   qb.sort = 'StartDateTime';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
