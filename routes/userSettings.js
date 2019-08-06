@@ -69,11 +69,11 @@ router.get('/role', (req, res, next) => {
   qb.entity = 'role';
   qb.addFields(['Id', 'Name', 'IsDeleted']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -156,11 +156,11 @@ router.get('/permission', (req, res, next) => {
   qb.entity = 'permission';
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -236,7 +236,7 @@ router.get('/checkpermissions', (req, res, next) => {
   qb.entity = 'permission';
   qb.addFields(['Id','Name','Roles.Id', 'Roles.Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField('Roles.isdeleted'); 
   qb.addFilterValue('0'); 
   if(req.query.permission){

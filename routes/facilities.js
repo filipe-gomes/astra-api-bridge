@@ -69,11 +69,11 @@ router.get('/campuslist', (req, res, next) => {
   qb.entity = 'campus';
   qb.addFields(['Id', 'Name', 'IsActive']);
   qb.sort = 'Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const campusUrl = config.defaultApi.url + config.defaultApi.campusEndpoint
@@ -162,11 +162,11 @@ router.get('/buildinglist', (req, res, next) => {
   qb.entity = 'building';
   qb.addFields(['Id', 'Name', 'BuildingCode', 'Campus.Name','IsActive']);
   qb.sort = 'Campus.Name%2CName';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const buildingsUrl = config.defaultApi.url + config.defaultApi.buildingsEndpoint
@@ -260,11 +260,11 @@ router.get('/roomlist', (req, res, next) => {
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
@@ -356,7 +356,7 @@ router.get('/availroomslist', (req, res, next) => {
   qb.sort = '%2BBuilding.Name,Name';
   qb.addFilterField('Id');
   qb.addFilterValue(filterconflicts);
-  qb.filtervariable = '!=';
+  qb.filterVariable = '!=';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint

@@ -66,11 +66,11 @@ router.get('/eventtypes', (req, res, next) => {
   qb.entity = 'eventType';
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -153,11 +153,11 @@ router.get('/eventmeetingtypes', (req, res, next) => {
   qb.entity = 'eventMeetingType';
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -240,11 +240,11 @@ router.get('/meetingtypes', (req, res, next) => {
   qb.entity = 'meetingType';
   qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

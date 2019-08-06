@@ -131,7 +131,7 @@ router.get('/all', (req, res, next) => {
 
   var qb = new QBget();
   qb.entity = 'activityList';
-  qb.resulttype = 'List';
+  qb.resultType = 'List';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -142,12 +142,12 @@ router.get('/all', (req, res, next) => {
   if (activitycat != 'All') {
     qb.addFilterField('ActivityTypeCode');
     qb.addFilterValue('1');
-    if (activitycat == 'Events') { qb.filtervariable = '!='; };
+    if (activitycat == 'Events') { qb.filterVariable = '!='; };
   }
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
   qb.sort = 'StartDateTime';
 
@@ -242,7 +242,7 @@ router.get('/findByDateRange', (req, res, next) => {
   const filterEndDate = req.query.end;
 
   var qb = new QBget();
-  qb.resulttype = 'DateRange';
+  qb.resultType = 'DateRange';
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -254,7 +254,7 @@ router.get('/findByDateRange', (req, res, next) => {
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
   qb.sort = 'StartDateTime';
   if (filterStartDate){
@@ -369,7 +369,7 @@ router.get('/filterbyActivityType', (req, res, next) => {
   const filterTypeName = req.query.typename;
 
   var qb = new QBget();
-  qb.resulttype = 'DateRange';
+  qb.resultType = 'DateRange';
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -396,7 +396,7 @@ router.get('/filterbyActivityType', (req, res, next) => {
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filtervariable = '!=';
+    qb.filterVariable = '!=';
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -478,7 +478,7 @@ router.get('/findConflicts', (req, res, next) => {
   const filterEndDate = req.query.end;
 
   var qb = new QBget();
-  qb.resulttype = 'Conflicts';
+  qb.resultType = 'Conflicts';
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -582,7 +582,7 @@ router.get('/findroomConflicts', (req, res, next) => {
 
   var qb = new QBget();
   qb.entity = 'activityList';
-  qb.resulttype = 'Conflicts';
+  qb.resultType = 'Conflicts';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -673,7 +673,7 @@ router.get('/filtered', (req, res, next) => {
   const advancedFilter = req.query.advancedFilter;
 
   var qb = new QBget();
-  qb.resulttype = 'Advanced';
+  qb.resultType = 'Advanced';
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);

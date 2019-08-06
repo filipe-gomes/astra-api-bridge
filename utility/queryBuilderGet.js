@@ -30,7 +30,7 @@ function facfield(entityname, fieldname) {
 module.exports = class QBGet {
     constructor() {
         this._entity = '';  //used to check for field name translations
-        this._resulttype = '';  
+        this._resultType = '';  
             /** 1. Advanced - open filter, no translation done
                 2. DateRange - filters for anything starting and ending within the date range
                 3. Conflicts - filters for anything that crosses the date/time range 
@@ -41,11 +41,11 @@ module.exports = class QBGet {
         this._startIndex = 0;
         this._allowUnlimitedResults = false;
         this._fields = [];
-        this._filterfields = [];
-        this._filtervalues = [];
+        this._filterFields = [];
+        this._filterValues = [];
         this._startDate = '';
         this._endDate = '';
-        this._filtervariable = '==';  //or '!='
+        this._filterVariable = '==';  //or '!='
         this._advancedFilter = '';  //free text filter with no translation
     }
 
@@ -57,20 +57,20 @@ module.exports = class QBGet {
         this._entity = string;
     }
 
-    get resulttype() {
-        return this._resulttype;
+    get resultType() {
+        return this._resultType;
     }
 
-    set resulttype(string) {
-        this._resulttype = string;
+    set resultType(string) {
+        this._resultType = string;
     }
 
-    get filtervariable() {
-        return this._filtervariable;
+    get filterVariable() {
+        return this._filterVariable;
     }
 
-    set filtervariable(string) {
-        this._filtervariable = string;
+    set filterVariable(string) {
+        this._filterVariable = string;
     }
     get sort() {
         return this._sort;
@@ -97,14 +97,14 @@ module.exports = class QBGet {
             let filterfields = {};
             filterfields = field.split(",");
             for (let i = 0; i < filterfields.length; i++) {
-                this._filterfields.push(facfield(this._entity,filterfields[i]));
+                this._filterFields.push(facfield(this._entity,filterfields[i]));
             }
         }
     }
 
     addFilterFields(fields) {
         if (fields) {
-            this._filterfields = this._filterfields.concat(fields);
+            this._filterFields = this._filterFields.concat(fields);
         }
     }
 
@@ -113,14 +113,14 @@ module.exports = class QBGet {
             let valuefields = {};
             valuefields = field.split(",");
             for (let i = 0; i < valuefields.length; i++) {
-                this._filtervalues.push(facfield(this._entity,valuefields[i]));
+                this._filterValues.push(facfield(this._entity,valuefields[i]));
             }
         }
     }
 
     addFilterValues(fields) {
         if (fields) {
-            this._filtervalues = this._filtervalues.concat(fields);
+            this._filterValues = this._filterValues.concat(fields);
         }
     }
 
@@ -169,8 +169,8 @@ module.exports = class QBGet {
 
     buildConflictsFilter() {
         let range = '';
-        if (this._resulttype == 'Conflicts' & this._startDate >= "1900-01-01") {
-            if (this._filterfields.length == 0) {
+        if (this._resultType == 'Conflicts' & this._startDate >= "1900-01-01") {
+            if (this._filterFields.length == 0) {
                 range += '&filter=';
             } else {
                 range += '%26%26';
@@ -185,37 +185,37 @@ module.exports = class QBGet {
 
     buildFilter() {
         let filter = '&filter=(';
-        if (this._filterfields.length < this._filtervalues.length) {
-            var filt = this._filterfields[0].trim();
-            if (this._filtervariable == '==') {
+        if (this._filterFields.length < this._filterValues.length) {
+            var filt = this._filterFields[0].trim();
+            if (this._filterVariable == '==') {
                 filter += filt + ' in (';
-                for (let i = 0; i < this._filtervalues.length; i++) {
-                    var valu = this._filtervalues[i].trim();
-                    if (this._filtervalues.length - 1 == i) {
+                for (let i = 0; i < this._filterValues.length; i++) {
+                    var valu = this._filterValues[i].trim();
+                    if (this._filterValues.length - 1 == i) {
                         filter += '"' + valu + '"))';
                     } else {
                         filter += '"' + valu + '",';
                     }
                 }
             } else {
-                for (let i = 0; i < this._filtervalues.length; i++) {
-                    var valu = this._filtervalues[i].trim();
-                    if (this._filtervalues.length - 1 == i) {
+                for (let i = 0; i < this._filterValues.length; i++) {
+                    var valu = this._filterValues[i].trim();
+                    if (this._filterValues.length - 1 == i) {
                         filter += '(' + filt + '!="' + valu + '"))';
                     } else {
                         filter += '(' + filt + '!="' + valu + '")%26%26';
                     }
                 }
             }
-        } else for (let i = 0; i < this._filterfields.length; i++) {
-            var filt = this._filterfields[i].trim();
-            if (this._filtervalues[i]) {
-                var valu = this._filtervalues[i].trim();
+        } else for (let i = 0; i < this._filterFields.length; i++) {
+            var filt = this._filterFields[i].trim();
+            if (this._filterValues[i]) {
+                var valu = this._filterValues[i].trim();
             }
-            if (this._filterfields.length - 1 == i) {
-                filter += '(' + filt + this._filtervariable + '"' + valu + '"))';
+            if (this._filterFields.length - 1 == i) {
+                filter += '(' + filt + this._filterVariable + '"' + valu + '"))';
             } else {
-                filter += '(' + filt + this._filtervariable + '"' + valu + '")%26%26';
+                filter += '(' + filt + this._filterVariable + '"' + valu + '")%26%26';
             }
         }
         return filter;
@@ -228,22 +228,22 @@ module.exports = class QBGet {
         // add fields
         query += '&fields=' + this._fields.join('%2C');
         
-        if (this._resulttype == 'Advanced') {
+        if (this._resultType == 'Advanced') {
             // bypase filter and values lists
             if (this._advancedFilter) {
                 query += '&filter=' + this._advancedFilter;
             }
         } else {
             //create filters based on field and value lists
-            if (this._filterfields.length > 0) {
+            if (this._filterFields.length > 0) {
                 query += this.buildFilter();
             }
 
             //add date range or conflict filters
-            if (this._resulttype == 'DateRange') {
+            if (this._resultType == 'DateRange') {
                 query += this.buildDateRange();
 
-            } else if (this._resulttype == 'Conflicts') {
+            } else if (this._resultType == 'Conflicts') {
                 query += this.buildConflictsFilter();
             }
 
