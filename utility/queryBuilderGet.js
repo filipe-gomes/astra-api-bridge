@@ -182,6 +182,45 @@ module.exports = class QBGet {
         }
         return range;        
     }
+
+    buildFilter() {
+        let filter = '&filter=(';
+        if (this._filterfields.length < this._filtervalues.length) {
+            var filt = this._filterfields[0].trim();
+            if (this._filtervariable == '==') {
+                filter += filt + ' in (';
+                for (let i = 0; i < this._filtervalues.length; i++) {
+                    var valu = this._filtervalues[i].trim();
+                    if (this._filtervalues.length - 1 == i) {
+                        filter += '"' + valu + '"))';
+                    } else {
+                        filter += '"' + valu + '",';
+                    }
+                }
+            } else {
+                for (let i = 0; i < this._filtervalues.length; i++) {
+                    var valu = this._filtervalues[i].trim();
+                    if (this._filtervalues.length - 1 == i) {
+                        filter += '(' + filt + '!="' + valu + '"))';
+                    } else {
+                        filter += '(' + filt + '!="' + valu + '")%26%26';
+                    }
+                }
+            }
+        } else for (let i = 0; i < this._filterfields.length; i++) {
+            var filt = this._filterfields[i].trim();
+            if (this._filtervalues[i]) {
+                var valu = this._filtervalues[i].trim();
+            }
+            if (this._filterfields.length - 1 == i) {
+                filter += '(' + filt + this._filtervariable + '"' + valu + '"))';
+            } else {
+                filter += '(' + filt + this._filtervariable + '"' + valu + '")%26%26';
+            }
+        }
+        return filter;
+    }
+
     
     toQueryString() {
         let query = '';
@@ -197,48 +236,15 @@ module.exports = class QBGet {
         } else {
             //create filters based on field and value lists
             if (this._filterfields.length > 0) {
-                query += '&filter=(';
-                if (this._filterfields.length < this._filtervalues.length) {
-                    var filt = this._filterfields[0].trim();
-                    if (this._filtervariable == '==') {
-                        query += filt + ' in (';
-                        for (let i = 0; i < this._filtervalues.length; i++) {
-                            var valu = this._filtervalues[i].trim();
-                            if (this._filtervalues.length - 1 == i) {
-                                query += '"' + valu + '"))';
-                            } else {
-                                query += '"' + valu + '",';
-                            }
-                        }
-                    } else {
-                        for (let i = 0; i < this._filtervalues.length; i++) {
-                            var valu = this._filtervalues[i].trim();
-                            if (this._filtervalues.length - 1 == i) {
-                                query += '(' + filt + '!="' + valu + '"))';
-                            } else {
-                                query += '(' + filt + '!="' + valu + '")%26%26';
-                            }
-                        }
-                    }
-                } else for (let i = 0; i < this._filterfields.length; i++) {
-                    var filt = this._filterfields[i].trim();
-                    if (this._filtervalues[i]) {
-                        var valu = this._filtervalues[i].trim();
-                    }
-                    if (this._filterfields.length - 1 == i) {
-                        query += '(' + filt + this._filtervariable + '"' + valu + '"))';
-                    } else {
-                        query += '(' + filt + this._filtervariable + '"' + valu + '")%26%26';
-                    }
-                }
+                query += this.buildFilter();
             }
 
             //add date range or conflict filters
             if (this._resulttype == 'DateRange') {
-                query += buildDateRange();
+                query += this.buildDateRange();
 
             } else if (this._resulttype == 'Conflicts') {
-                query += buildConflictsFilter();
+                query += this.buildConflictsFilter();
             }
 
             //add standard parameters
