@@ -1,5 +1,4 @@
 const expect = require('chai').expect
-const server = require('../routes/index');
 const config = require('../config');
 
 describe('global and config tests', () => {
@@ -11,8 +10,12 @@ describe('global and config tests', () => {
     expect(config).to.not.be.undefined;
   });
 
-  it('should have a non-empty api', () => {
+  it('should have a non-empty site url', () => {
     expect(config.defaultApi.url).to.not.be.empty;
+  });
+
+  it('should have a site url read in from .env', () => {
+    expect(config.defaultApi.url).to.not.equal('site');
   });
 
   it('should have a non-empty api username', () => {
