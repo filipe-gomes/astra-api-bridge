@@ -148,13 +148,49 @@ module.exports = class QBGet {
         this._advancedFilter = string;
     }
 
+    buildDateRange() {
+        let range = '';
+        if (this._startDate >= "1900-01-01") {
+            if (this._filterFields.length == 0) {
+                range += '&filter=';
+            } else {
+                range += '%26%26';
+            }
+            range += '((StartDateTime>%3D"' + this._startDate + '")';
+            
+            if (this._endDate >= this._startDate) {
+                range += '%26%26(EndDateTime<%3D"' + this._endDate + '"))';
+            } else {
+                range += ')';
+            }
+        }
+        return range;
+    }   
 
+    buildConflictsFilter() {
+        let range = '';
+        if (this._resulttype == 'Conflicts' & this._startDate >= "1900-01-01") {
+            if (this._filterfields.length == 0) {
+                range += '&filter=';
+            } else {
+                range += '%26%26';
+            }
+            range += '(((StartDateTime<%3D"' + this._endDate + '")';
+            range += '%26%26(EndDateTime>%3D"' + this._startDate + '"))';
+            range += '%7C%7C((StartDateTime>%3D"' + this._startDate + '")';
+            range += '%26%26(StartDateTime<%3D"' + this._endDate + '")))';
+        }
+        return range;        
+    }
+    
     toQueryString() {
         let query = '';
-        //add fields
+        
+        // add fields
         query += '&fields=' + this._fields.join('%2C');
-        //if using advanced filter, add and return results
+        
         if (this._resulttype == 'Advanced') {
+            // bypase filter and values lists
             if (this._advancedFilter) {
                 query += '&filter=' + this._advancedFilter;
             }
@@ -196,30 +232,15 @@ module.exports = class QBGet {
                     }
                 }
             }
+
             //add date range or conflict filters
-            if (this._resulttype == 'DateRange' & this._startDate >= "1900-01-01") {
-                if (this._filterfields.length == 0) {
-                    query += '&filter=';
-                } else {
-                    query += '%26%26';
-                }
-                query += '((StartDateTime>%3D"' + this._startDate + '")';
-                if (this._endDate >= this._startDate) {
-                    query += '%26%26(EndDateTime<%3D"' + this._endDate + '"))';
-                } else {
-                    query += ')';
-                }
-            } else if (this._resulttype == 'Conflicts' & this._startDate >= "1900-01-01") {
-                if (this._filterfields.length == 0) {
-                    query += '&filter=';
-                } else {
-                    query += '%26%26';
-                }
-                query += '(((StartDateTime<%3D"' + this._endDate + '")';
-                query += '%26%26(EndDateTime>%3D"' + this._startDate + '"))';
-                query += '%7C%7C((StartDateTime>%3D"' + this._startDate + '")';
-                query += '%26%26(StartDateTime<%3D"' + this._endDate + '")))';
+            if (this._resulttype == 'DateRange') {
+                query += buildDateRange();
+
+            } else if (this._resulttype == 'Conflicts') {
+                query += buildConflictsFilter();
             }
+
             //add standard parameters
             query += '&allowUnlimitedResults=' + this._allowUnlimitedResults;
             query += '&sort=' + this._sort;
