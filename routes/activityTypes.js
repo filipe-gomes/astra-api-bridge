@@ -68,7 +68,7 @@ router.get('/eventtypes', (req, res, next) => {
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
@@ -155,7 +155,7 @@ router.get('/eventmeetingtypes', (req, res, next) => {
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
@@ -242,7 +242,7 @@ router.get('/meetingtypes', (req, res, next) => {
   qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';

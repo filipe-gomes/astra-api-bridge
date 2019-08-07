@@ -71,7 +71,7 @@ router.get('/campuslist', (req, res, next) => {
   qb.addFields(['Id', 'Name', 'IsActive']);
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
@@ -164,7 +164,7 @@ router.get('/buildinglist', (req, res, next) => {
   qb.addFields(['Id', 'Name', 'BuildingCode', 'Campus.Name','IsActive']);
   qb.sort = 'Campus.Name%2CName';
   qb.queryType = QueryTypeEnum.LIST;  
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
@@ -262,7 +262,7 @@ router.get('/roomlist', (req, res, next) => {
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
   qb.queryType = QueryTypeEnum.LIST;  
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
@@ -355,7 +355,7 @@ router.get('/availroomslist', (req, res, next) => {
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
-  qb.addFilterField('Id');
+  qb.addFilterFields('Id');
   qb.addFilterValue(filterconflicts);
   qb.filterVariable = '!=';
 

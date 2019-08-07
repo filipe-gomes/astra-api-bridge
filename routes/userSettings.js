@@ -72,7 +72,7 @@ router.get('/role', (req, res, next) => {
   qb.addFields(['Id', 'Name', 'IsDeleted']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;  
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
@@ -159,7 +159,7 @@ router.get('/permission', (req, res, next) => {
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
+  qb.addFilterFields(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
@@ -238,14 +238,14 @@ router.get('/checkpermissions', (req, res, next) => {
   qb.addFields(['Id','Name','Roles.Id', 'Roles.Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField('Roles.isdeleted'); 
+  qb.addFilterFields('Roles.isdeleted'); 
   qb.addFilterValue('0'); 
   if(req.query.permission){
-      qb.addFilterField('Name');
+      qb.addFilterFields('Name');
       qb.addFilterValue(req.query.permission);
   }
   if(req.query.role){
-    qb.addFilterField('Roles.Name');
+    qb.addFilterFields('Roles.Name');
     qb.addFilterValue(req.query.role);
   }
 

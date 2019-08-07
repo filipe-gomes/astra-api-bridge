@@ -3,9 +3,6 @@ const moment = require('moment');
 const QueryTypeEnum = require('./queryTypeEnum');
 const EntityEnum = require('./entityEnum');
 
-// todo: add queryBuilderPost and basic calls
-
-
 function translateField(entity, fieldname) {
     let entityfield = fieldname;    
     if (entity ===  'activityList'){
@@ -30,6 +27,7 @@ function translateField(entity, fieldname) {
 }
 
 module.exports = class QBGet {
+
     constructor() {
         this._entity = EntityEnum.UNDEFINED;
         this._queryType = QueryTypeEnum.UNDEFINED;  
@@ -90,19 +88,13 @@ module.exports = class QBGet {
         }
     }
 
-    addFilterField(field) {
-        if (field) {
-            let filterfields = {};
-            filterfields = field.split(",");
-            for (let i = 0; i < filterfields.length; i++) {
-                this._filterFields.push(translateField(this._entity,filterfields[i]));
-            }
-        }
-    }
-
     addFilterFields(fields) {
         if (fields) {
-            this._filterFields = this._filterFields.concat(fields);
+            let fieldArr = {};
+            fieldArr = fields.split(",");
+            for (let i = 0; i < fieldArr.length; i++) {
+                this._filterFields.push(translateField(this._entity,fieldArr[i]));
+            }
         }
     }
 
