@@ -6,7 +6,7 @@ const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
-
+const QueryTypeEnum = require('../utility/queryTypeEnum');
 
 /**
  * @swagger
@@ -69,7 +69,7 @@ router.get('/campuslist', (req, res, next) => {
   qb.entity = 'campus';
   qb.addFields(['Id', 'Name', 'IsActive']);
   qb.sort = 'Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
@@ -162,7 +162,7 @@ router.get('/buildinglist', (req, res, next) => {
   qb.entity = 'building';
   qb.addFields(['Id', 'Name', 'BuildingCode', 'Campus.Name','IsActive']);
   qb.sort = 'Campus.Name%2CName';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;  
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
@@ -260,7 +260,7 @@ router.get('/roomlist', (req, res, next) => {
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;  
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){

@@ -6,6 +6,7 @@ const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
+const QueryTypeEnum = require('../utility/queryTypeEnum');
 
 
 /**
@@ -69,7 +70,7 @@ router.get('/role', (req, res, next) => {
   qb.entity = 'role';
   qb.addFields(['Id', 'Name', 'IsDeleted']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;  
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
@@ -156,7 +157,7 @@ router.get('/permission', (req, res, next) => {
   qb.entity = 'permission';
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
@@ -236,7 +237,7 @@ router.get('/checkpermissions', (req, res, next) => {
   qb.entity = 'permission';
   qb.addFields(['Id','Name','Roles.Id', 'Roles.Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterField('Roles.isdeleted'); 
   qb.addFilterValue('0'); 
   if(req.query.permission){

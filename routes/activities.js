@@ -6,6 +6,7 @@ const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
+const QueryTypeEnum = require('../utility/queryTypeEnum');
 
 {/**swagger def
  * @swagger
@@ -131,7 +132,7 @@ router.get('/all', (req, res, next) => {
 
   var qb = new QBget();
   qb.entity = 'activityList';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -242,7 +243,7 @@ router.get('/findByDateRange', (req, res, next) => {
   const filterEndDate = req.query.end;
 
   var qb = new QBget();
-  qb.resultType = 'DateRange';
+  qb.queryType = QueryTypeEnum.DATE_RANGE;
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -369,7 +370,7 @@ router.get('/filterbyActivityType', (req, res, next) => {
   const filterTypeName = req.query.typename;
 
   var qb = new QBget();
-  qb.resultType = 'DateRange';
+  qb.queryType = QueryTypeEnum.DATE_RANGE;
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -478,7 +479,7 @@ router.get('/findConflicts', (req, res, next) => {
   const filterEndDate = req.query.end;
 
   var qb = new QBget();
-  qb.resultType = 'Conflicts';
+  qb.queryType = QueryTypeEnum.CONFLICTS;  
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -582,7 +583,7 @@ router.get('/findroomConflicts', (req, res, next) => {
 
   var qb = new QBget();
   qb.entity = 'activityList';
-  qb.resultType = 'Conflicts';
+  qb.queryType = QueryTypeEnum.CONFLICTS;  
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
   qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
@@ -673,7 +674,7 @@ router.get('/filtered', (req, res, next) => {
   const advancedFilter = req.query.advancedFilter;
 
   var qb = new QBget();
-  qb.resultType = 'Advanced';
+  qb.queryType = QueryTypeEnum.ADVANCED;  
   qb.entity = 'activityList';
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
   qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);

@@ -6,7 +6,7 @@ const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
-
+const QueryTypeEnum = require('../utility/queryTypeEnum');
 
 /**
  * @swagger
@@ -66,7 +66,7 @@ router.get('/eventtypes', (req, res, next) => {
   qb.entity = 'eventType';
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
@@ -153,7 +153,7 @@ router.get('/eventmeetingtypes', (req, res, next) => {
   qb.entity = 'eventMeetingType';
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
@@ -240,7 +240,7 @@ router.get('/meetingtypes', (req, res, next) => {
   qb.entity = 'meetingType';
   qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.resultType = 'List';
+  qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){

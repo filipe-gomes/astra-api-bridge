@@ -1,5 +1,6 @@
 "use strict";
 const moment = require('moment');
+const QueryTypeEnum = require('./queryTypeEnum');
 
 // todo: add queryBuilderPost and basic calls
 
@@ -30,11 +31,7 @@ function facfield(entityname, fieldname) {
 module.exports = class QBGet {
     constructor() {
         this._entity = '';  //used to check for field name translations
-        this._resultType = '';  
-            /** 1. Advanced - open filter, no translation done
-                2. DateRange - filters for anything starting and ending within the date range
-                3. Conflicts - filters for anything that crosses the date/time range 
-            */
+        this._queryType = QueryTypeEnum.UNDEFINED;  
         this._sort = '';
         this._limit = 200;
         this._page = 1;
@@ -57,12 +54,12 @@ module.exports = class QBGet {
         this._entity = string;
     }
 
-    get resultType() {
-        return this._resultType;
+    get queryType() {
+        return this._queryType;
     }
 
-    set resultType(string) {
-        this._resultType = string;
+    set queryType(enumVal) {
+        this._queryType = enumVal;
     }
 
     get filterVariable() {
@@ -169,7 +166,7 @@ module.exports = class QBGet {
 
     buildConflictsFilter() {
         let range = '';
-        if (this._resultType == 'Conflicts' & this._startDate >= "1900-01-01") {
+        if (this._startDate >= "1900-01-01") {
             if (this._filterFields.length == 0) {
                 range += '&filter=';
             } else {
@@ -228,7 +225,7 @@ module.exports = class QBGet {
         // add fields
         query += '&fields=' + this._fields.join('%2C');
         
-        if (this._resultType == 'Advanced') {
+        if (this._queryType === QueryTypeEnum.ADVANCED) {
             // bypase filter and values lists
             if (this._advancedFilter) {
                 query += '&filter=' + this._advancedFilter;
@@ -240,10 +237,10 @@ module.exports = class QBGet {
             }
 
             //add date range or conflict filters
-            if (this._resultType == 'DateRange') {
+            if (this._queryType === QueryTypeEnum.DATE_RANGE) {
                 query += this.buildDateRange();
 
-            } else if (this._resultType == 'Conflicts') {
+            } else if (this._queryType == QueryTypeEnum.CONFLICTS) {
                 query += this.buildConflictsFilter();
             }
 
