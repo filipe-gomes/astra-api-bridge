@@ -72,7 +72,7 @@ router.get('/campuslist', (req, res, next) => {
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -165,7 +165,7 @@ router.get('/buildinglist', (req, res, next) => {
   qb.sort = 'Campus.Name%2CName';
   qb.queryType = QueryTypeEnum.LIST;  
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -263,7 +263,7 @@ router.get('/roomlist', (req, res, next) => {
   qb.sort = '%2BBuilding.Name,Name';
   qb.queryType = QueryTypeEnum.LIST;  
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -356,7 +356,7 @@ router.get('/availroomslist', (req, res, next) => {
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
   qb.addFilterFields('Id');
-  qb.addFilterValue(filterconflicts);
+  qb.addFilterValues(filterconflicts);
   qb.filterVariable = '!=';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

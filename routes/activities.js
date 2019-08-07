@@ -143,11 +143,11 @@ router.get('/all', (req, res, next) => {
   //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
   if (activitycat != 'All') {
     qb.addFilterFields('ActivityTypeCode');
-    qb.addFilterValue('1');
+    qb.addFilterValues('1');
     if (activitycat == 'Events') { qb.filterVariable = '!='; };
   }
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -253,7 +253,7 @@ router.get('/findByDateRange', (req, res, next) => {
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
   //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -393,9 +393,9 @@ router.get('/filterbyActivityType', (req, res, next) => {
   } else {
     qb.addFilterFields('SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name');
   }
-  qb.addFilterValue(filterTypeName);
+  qb.addFilterValues(filterTypeName);
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -600,7 +600,7 @@ router.get('/findroomConflicts', (req, res, next) => {
   };
   if (filterRoomId) {
     qb.addFilterFields('Location.RoomId');
-    qb.addFilterValue(filterRoomId);
+    qb.addFilterValues(filterRoomId);
   } 
 
     const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

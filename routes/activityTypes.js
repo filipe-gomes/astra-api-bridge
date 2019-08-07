@@ -69,7 +69,7 @@ router.get('/eventtypes', (req, res, next) => {
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -156,7 +156,7 @@ router.get('/eventmeetingtypes', (req, res, next) => {
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -243,7 +243,7 @@ router.get('/meetingtypes', (req, res, next) => {
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };

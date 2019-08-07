@@ -73,7 +73,7 @@ router.get('/role', (req, res, next) => {
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;  
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -160,7 +160,7 @@ router.get('/permission', (req, res, next) => {
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterFields(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
     qb.filterVariable = '!=';
   };
@@ -239,14 +239,14 @@ router.get('/checkpermissions', (req, res, next) => {
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFilterFields('Roles.isdeleted'); 
-  qb.addFilterValue('0'); 
+  qb.addFilterValues('0'); 
   if(req.query.permission){
       qb.addFilterFields('Name');
-      qb.addFilterValue(req.query.permission);
+      qb.addFilterValues(req.query.permission);
   }
   if(req.query.role){
     qb.addFilterFields('Roles.Name');
-    qb.addFilterValue(req.query.role);
+    qb.addFilterValues(req.query.role);
   }
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

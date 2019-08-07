@@ -97,20 +97,14 @@ module.exports = class QBGet {
             }
         }
     }
-
-    addFilterValue(field) {
-        if (field) {
-            let valuefields = {};
-            valuefields = field.split(",");
-            for (let i = 0; i < valuefields.length; i++) {
-                this._filterValues.push(translateField(this._entity,valuefields[i]));
+    
+    addFilterValues(values) {
+        if (values) {
+            let valueArr = {};
+            valueArr = values.split(",");
+            for (let i = 0; i < valueArr.length; i++) {
+                this._filterValues.push(translateField(this._entity,valueArr[i]));
             }
-        }
-    }
-
-    addFilterValues(fields) {
-        if (fields) {
-            this._filterValues = this._filterValues.concat(fields);
         }
     }
 
