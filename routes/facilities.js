@@ -5,7 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -66,7 +66,7 @@ const EntityEnum = require('../utility/entityEnum');
  *           $ref: '#/definitions/Campus'
  */
 router.get('/campuslist', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.CAMPUS;
   qb.addFields(['Id', 'Name', 'IsActive']);
   qb.sort = 'Name';
@@ -159,7 +159,7 @@ router.get('/campuslist', (req, res, next) => {
  *           $ref: '#/definitions/Building'
  */
 router.get('/buildinglist', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.BUILDING;
   qb.addFields(['Id', 'Name', 'BuildingCode', 'Campus.Name','IsActive']);
   qb.sort = 'Campus.Name%2CName';
@@ -256,7 +256,7 @@ router.get('/buildinglist', (req, res, next) => {
  */
 router.get('/roomlist', (req, res, next) => {
   
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ROOM;
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
@@ -350,7 +350,7 @@ router.get('/roomlist', (req, res, next) => {
 router.get('/availroomslist', (req, res, next) => {
   const filterconflicts = req.query.Conflicts;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ROOM;
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);

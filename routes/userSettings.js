@@ -5,7 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -67,7 +67,7 @@ function createresultlist(userSettingsData) {
  *           $ref: '#/definitions/UserSettings'
  */
 router.get('/role', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ROLE;
   qb.addFields(['Id', 'Name', 'IsDeleted']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
@@ -154,7 +154,7 @@ router.get('/role', (req, res, next) => {
  *           $ref: '#/definitions/UserSettings'
  */
 router.get('/permission', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.PERMISSION;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
@@ -233,7 +233,7 @@ router.get('/permission', (req, res, next) => {
  *         description: A role permission record if exists
  */
 router.get('/checkpermissions', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.PERMISSION;
   qb.addFields(['Id','Name','Roles.Id', 'Roles.Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';

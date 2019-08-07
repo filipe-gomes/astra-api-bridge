@@ -5,7 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -63,7 +63,7 @@ function createresultlist(activityTypeData) {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/eventtypes', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.EVENT_TYPE;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
@@ -150,7 +150,7 @@ router.get('/eventtypes', (req, res, next) => {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/eventmeetingtypes', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.EVENT_MEETING_TYPE;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
@@ -237,7 +237,7 @@ router.get('/eventmeetingtypes', (req, res, next) => {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/meetingtypes', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.MEETING_TYPE;
   qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';

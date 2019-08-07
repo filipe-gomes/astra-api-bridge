@@ -5,7 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -131,7 +131,7 @@ return resultlist;
 router.get('/all', (req, res, next) => {
   const activitycat = req.query.activitycategory;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -242,7 +242,7 @@ router.get('/findByDateRange', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.DATE_RANGE;
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -369,7 +369,7 @@ router.get('/filterbyActivityType', (req, res, next) => {
   const filterActivityType = req.query.activitytype;
   const filterTypeName = req.query.typename;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.DATE_RANGE;
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -478,7 +478,7 @@ router.get('/findConflicts', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.CONFLICTS;  
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -581,7 +581,7 @@ router.get('/findroomConflicts', (req, res, next) => {
   const filterEndDate = req.query.end;
   const filterRoomId = req.query.roomId;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.queryType = QueryTypeEnum.CONFLICTS;  
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -673,7 +673,7 @@ router.get('/findroomConflicts', (req, res, next) => {
 router.get('/filtered', (req, res, next) => {
   const advancedFilter = req.query.advancedFilter;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.ADVANCED;  
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);

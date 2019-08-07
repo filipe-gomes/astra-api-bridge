@@ -26,7 +26,7 @@ function translateField(entity, fieldname) {
     return entityfield;
 }
 
-module.exports = class QBGet {
+module.exports = class ReadQueryBuilder {
 
     constructor() {
         this._entity = EntityEnum.UNDEFINED;
@@ -227,7 +227,6 @@ module.exports = class QBGet {
             //add date range or conflict filters
             if (this._queryType === QueryTypeEnum.DATE_RANGE) {
                 query += this.buildDateRange();
-
             } else if (this._queryType == QueryTypeEnum.CONFLICTS) {
                 query += this.buildConflictsFilter();
             }
