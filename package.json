@@ -11,7 +11,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "axios-cookiejar-support": "^0.4.2",
     "camelcase": "^5.0.0",
     "chai": "^4.2.0",
