@@ -74,7 +74,7 @@ router.get('/campuslist', (req, res, next) => {
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const campusUrl = config.defaultApi.url + config.defaultApi.campusEndpoint
@@ -167,7 +167,7 @@ router.get('/buildinglist', (req, res, next) => {
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const buildingsUrl = config.defaultApi.url + config.defaultApi.buildingsEndpoint
@@ -265,7 +265,7 @@ router.get('/roomlist', (req, res, next) => {
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
@@ -357,7 +357,7 @@ router.get('/availroomslist', (req, res, next) => {
   qb.sort = '%2BBuilding.Name,Name';
   qb.addFilterFields('Id');
   qb.addFilterValues(filterconflicts);
-  qb.filterVariable = '!=';
+  qb.equalityFilter = false;
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint

@@ -144,12 +144,12 @@ router.get('/all', (req, res, next) => {
   if (activitycat != 'All') {
     qb.addFilterFields('ActivityTypeCode');
     qb.addFilterValues('1');
-    if (activitycat == 'Events') { qb.filterVariable = '!='; };
+    if (activitycat == 'Events') { qb.equalityFilter = false; };
   }
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   qb.sort = 'StartDateTime';
 
@@ -255,7 +255,7 @@ router.get('/findByDateRange', (req, res, next) => {
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   qb.sort = 'StartDateTime';
   if (filterStartDate){
@@ -397,7 +397,7 @@ router.get('/filterbyActivityType', (req, res, next) => {
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

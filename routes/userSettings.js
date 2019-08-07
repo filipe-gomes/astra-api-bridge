@@ -75,7 +75,7 @@ router.get('/role', (req, res, next) => {
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -162,7 +162,7 @@ router.get('/permission', (req, res, next) => {
   qb.addFilterFields(req.query.filterfields);
   qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

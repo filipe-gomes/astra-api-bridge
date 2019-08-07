@@ -41,7 +41,7 @@ module.exports = class QBGet {
         this._filterValues = [];
         this._startDate = '';
         this._endDate = '';
-        this._filterVariable = '==';  //or '!='
+        this._equalityFilter = true;  // true : ==, false : !=
         this._advancedFilter = '';  //free text filter with no translation
     }
 
@@ -61,12 +61,12 @@ module.exports = class QBGet {
         this._queryType = enumVal;
     }
 
-    get filterVariable() {
-        return this._filterVariable;
+    get equalityFilter() {
+        return this._equalityFilter;
     }
 
-    set filterVariable(string) {
-        this._filterVariable = string;
+    set equalityFilter(val) {
+        this._equalityFilter = val;
     }
     get sort() {
         return this._sort;
@@ -123,7 +123,7 @@ module.exports = class QBGet {
     set endDate(date) {
         this._endDate = moment(date).format('YYYY-MM-DDTHH:mm:ss');
     }
-
+    
     get advancedFilter() {
         return this._advancedFilter;
     }
@@ -171,7 +171,7 @@ module.exports = class QBGet {
         let filter = '&filter=(';
         if (this._filterFields.length < this._filterValues.length) {
             var filt = this._filterFields[0].trim();
-            if (this._filterVariable == '==') {
+            if (this._equalityFilter) {
                 filter += filt + ' in (';
                 for (let i = 0; i < this._filterValues.length; i++) {
                     var valu = this._filterValues[i].trim();
@@ -196,10 +196,11 @@ module.exports = class QBGet {
             if (this._filterValues[i]) {
                 var valu = this._filterValues[i].trim();
             }
+            let comparisonOperator = this._equalityFilter ? '==' : '!=';
             if (this._filterFields.length - 1 == i) {
-                filter += '(' + filt + this._filterVariable + '"' + valu + '"))';
+                filter += '(' + filt + comparisonOperator + '"' + valu + '"))';
             } else {
-                filter += '(' + filt + this._filterVariable + '"' + valu + '")%26%26';
+                filter += '(' + filt + comparisonOperator + '"' + valu + '")%26%26';
             }
         }
         return filter;
