@@ -7,6 +7,7 @@ const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
+const EntityEnum = require('../utility/entityEnum');
 
 /**
  * @swagger
@@ -66,7 +67,7 @@ const QueryTypeEnum = require('../utility/queryTypeEnum');
  */
 router.get('/campuslist', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'campus';
+  qb.entity = EntityEnum.CAMPUS;
   qb.addFields(['Id', 'Name', 'IsActive']);
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
@@ -159,7 +160,7 @@ router.get('/campuslist', (req, res, next) => {
  */
 router.get('/buildinglist', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'building';
+  qb.entity = EntityEnum.BUILDING;
   qb.addFields(['Id', 'Name', 'BuildingCode', 'Campus.Name','IsActive']);
   qb.sort = 'Campus.Name%2CName';
   qb.queryType = QueryTypeEnum.LIST;  
@@ -256,7 +257,7 @@ router.get('/buildinglist', (req, res, next) => {
 router.get('/roomlist', (req, res, next) => {
   
   var qb = new QBget();
-  qb.entity = 'room';
+  qb.entity = EntityEnum.ROOM;
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
@@ -350,7 +351,7 @@ router.get('/availroomslist', (req, res, next) => {
   const filterconflicts = req.query.Conflicts;
 
   var qb = new QBget();
-  qb.entity = 'room';
+  qb.entity = EntityEnum.ROOM;
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';

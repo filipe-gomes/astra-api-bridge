@@ -1,13 +1,14 @@
 "use strict";
 const moment = require('moment');
 const QueryTypeEnum = require('./queryTypeEnum');
+const EntityEnum = require('./entityEnum');
 
 // todo: add queryBuilderPost and basic calls
 
 
-function facfield(entityname, fieldname) {
-    let entityfield = fieldname;
-    if (entityname == 'activityList'){
+function translateField(entity, fieldname) {
+    let entityfield = fieldname;    
+    if (entity ===  'activityList'){
         switch (entityfield.toUpperCase()) {
             case 'eventType'.toUpperCase():
                 entityfield = 'EventMeetingByActivityId.Event.EventType.Name';
@@ -30,7 +31,7 @@ function facfield(entityname, fieldname) {
 
 module.exports = class QBGet {
     constructor() {
-        this._entity = '';  //used to check for field name translations
+        this._entity = EntityEnum.UNDEFINED;
         this._queryType = QueryTypeEnum.UNDEFINED;  
         this._sort = '';
         this._limit = 200;
@@ -50,8 +51,8 @@ module.exports = class QBGet {
         return this._entity;
     }
 
-    set entity(string) {
-        this._entity = string;
+    set entity(enumVal) {
+        this._entity = enumVal;
     }
 
     get queryType() {
@@ -94,7 +95,7 @@ module.exports = class QBGet {
             let filterfields = {};
             filterfields = field.split(",");
             for (let i = 0; i < filterfields.length; i++) {
-                this._filterFields.push(facfield(this._entity,filterfields[i]));
+                this._filterFields.push(translateField(this._entity,filterfields[i]));
             }
         }
     }
@@ -110,7 +111,7 @@ module.exports = class QBGet {
             let valuefields = {};
             valuefields = field.split(",");
             for (let i = 0; i < valuefields.length; i++) {
-                this._filterValues.push(facfield(this._entity,valuefields[i]));
+                this._filterValues.push(translateField(this._entity,valuefields[i]));
             }
         }
     }

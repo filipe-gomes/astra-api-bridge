@@ -7,6 +7,7 @@ const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
+const EntityEnum = require('../utility/entityEnum');
 
 /**
  * @swagger
@@ -63,7 +64,7 @@ function createresultlist(activityTypeData) {
  */
 router.get('/eventtypes', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'eventType';
+  qb.entity = EntityEnum.EVENT_TYPE;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
@@ -150,7 +151,7 @@ router.get('/eventtypes', (req, res, next) => {
  */
 router.get('/eventmeetingtypes', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'eventMeetingType';
+  qb.entity = EntityEnum.EVENT_MEETING_TYPE;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
@@ -237,7 +238,7 @@ router.get('/eventmeetingtypes', (req, res, next) => {
  */
 router.get('/meetingtypes', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'meetingType';
+  qb.entity = EntityEnum.MEETING_TYPE;
   qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;

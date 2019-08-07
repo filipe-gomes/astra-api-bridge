@@ -7,6 +7,7 @@ const config = require('../config');
 const camelCase = require('camelcase');
 const QBget = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
+const EntityEnum = require('../utility/entityEnum');
 
 
 /**
@@ -67,7 +68,7 @@ function createresultlist(userSettingsData) {
  */
 router.get('/role', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'role';
+  qb.entity = EntityEnum.ROLE;
   qb.addFields(['Id', 'Name', 'IsDeleted']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;  
@@ -154,7 +155,7 @@ router.get('/role', (req, res, next) => {
  */
 router.get('/permission', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'permission';
+  qb.entity = EntityEnum.PERMISSION;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
@@ -234,7 +235,7 @@ router.get('/permission', (req, res, next) => {
  */
 router.get('/checkpermissions', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = 'permission';
+  qb.entity = EntityEnum.PERMISSION;
   qb.addFields(['Id','Name','Roles.Id', 'Roles.Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
