@@ -168,7 +168,6 @@ router.get('/permission', (req, res, next) => {
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const userSettingsUrl = config.defaultApi.url + config.defaultApi.permEndpoint
   +qb.toQueryString();
-  console.log(userSettingsUrl);
   const credentialData = {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
@@ -258,7 +257,6 @@ router.get('/checkpermissions', (req, res, next) => {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
   };
-  console.log(userSettingsUrl);
 
   axiosCookieJarSupport(axios);
   const cookieJar = new tough.CookieJar();

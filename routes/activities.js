@@ -160,7 +160,6 @@ router.get('/all', (req, res, next) => {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
   };
-  console.log(activitiesUrl);
   axiosCookieJarSupport(axios);
   const cookieJar = new tough.CookieJar();
 
