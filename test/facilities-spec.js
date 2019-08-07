@@ -6,10 +6,10 @@ let app = require('../app');
 
 chai.use(chaiHttp);
 
-describe('/GET all event types', () => {
-  it('should GET all the event types in friendly JSON', (done) => {
+describe('/GET all campuses', () => {
+  it('should GET all the campuses in friendly JSON', (done) => {
     chai.request(app)
-      .get('/activity-types/eventtypes')
+      .get('/facilities/campuslist')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
@@ -18,10 +18,10 @@ describe('/GET all event types', () => {
   }).timeout(15000);
 });
 
-describe('/GET all event meeting types', () => {
-  it('should GET all the event meeting types in friendly JSON', (done) => {
+describe('/GET all buildings', () => {
+  it('should GET all the buildings in friendly JSON', (done) => {
     chai.request(app)
-      .get('/activity-types/eventmeetingtypes')
+      .get('/facilities/buildinglist')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
@@ -30,10 +30,10 @@ describe('/GET all event meeting types', () => {
   }).timeout(15000);
 });
 
-describe('/GET all section meeting types', () => {
-  it('should GET all the section meeting types in friendly JSON', (done) => {
+describe('/GET all rooms', () => {
+  it('should GET all the rooms in friendly JSON', (done) => {
     chai.request(app)
-      .get('/activity-types/meetingtypes')
+      .get('/facilities/roomlist')
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;

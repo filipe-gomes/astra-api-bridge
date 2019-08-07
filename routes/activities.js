@@ -5,9 +5,11 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
 const camelCase = require('camelcase');
-const QueryBuilder = require('../utility/queryBuilder');
+const QBget = require('../utility/queryBuilderGet');
+const QueryTypeEnum = require('../utility/queryTypeEnum');
+const EntityEnum = require('../utility/entityEnum');
 
-/**
+{/**swagger def
  * @swagger
  * definition:
  *   Activity:
@@ -17,8 +19,8 @@ const QueryBuilder = require('../utility/queryBuilder');
  *       activityName:
  *         type: string
  *       startDate:
- *         type: date
- *         format: date-time
+ *         type: string
+ *         format: date
  *       activityTypeCode:
  *         type: integer
  *       campusName:
@@ -41,7 +43,55 @@ const QueryBuilder = require('../utility/queryBuilder');
  *         type: string
  *       canView:
  *         type: boolean
+ *       eventType:
+ *         type: string
+ *       eventmeetingType:
+ *         type: string
+ *       sectionmeetingType:
+ *         type: string
+ *       roomId:
+ *         type: string
  */
+
+  // todo add some of the other fields below:
+  //qb.addFields([Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
+  //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
+  //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+  //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+
+  // todo correct join calls in activity data
+}
+
+function createresultlist(activityData) {
+  let resultlist = [];
+  for (let i = 0; i < activityData.length; i++) {
+    resultlist[i] = {};
+    resultlist[i].activityId = activityData[i][0];
+    resultlist[i].activityName = activityData[i][1];
+    resultlist[i].startDate = activityData[i][2];
+    resultlist[i].activityTypeCode = activityData[i][3];
+    resultlist[i].campusName = activityData[i][4];
+    resultlist[i].buildingCode = activityData[i][5];
+    resultlist[i].roomNumber = activityData[i][6];
+    resultlist[i].locationName = activityData[i][7];
+    resultlist[i].startDateTime = activityData[i][8];
+    resultlist[i].endDateTime = activityData[i][9];
+    resultlist[i].instructorName = activityData[i][10];
+    resultlist[i].days = activityData[i][11];
+    resultlist[i].canView = activityData[i][12];
+    resultlist[i].sectionId = activityData[i][13];
+    resultlist[i].eventId = activityData[i][14];
+    resultlist[i].eventImage = activityData[i][15];
+    resultlist[i].parentactivityId = activityData[i][16];
+    resultlist[i].parentactivityName = activityData[i][17];
+    resultlist[i].eventType = activityData[i][18];
+    resultlist[i].eventMeetingType = activityData[i][19];
+    resultlist[i].sectionMeetingType = activityData[i][20];
+    resultlist[i].roomId = activityData[i][21]
+    resultlist[i].index = i;
+  }
+return resultlist;
+}
 
 /**
  * @swagger
@@ -49,7 +99,27 @@ const QueryBuilder = require('../utility/queryBuilder');
  *   get:
  *     tags:
  *       - activities
- *     description: Returns all activities
+ *     description: Returns all activities, optional filter by type
+ *     parameters:
+ *       - name: activitycategory
+ *         description: Select an activity category filter
+ *         in: query
+ *         enum: ["All","Academics","Events"]
+ *         required: true
+ *         type: string 
+ *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -59,39 +129,50 @@ const QueryBuilder = require('../utility/queryBuilder');
  *           $ref: '#/definitions/Activity'
  */
 router.get('/all', (req, res, next) => {
+  const activitycat = req.query.activitycategory;
+
+  var qb = new QBget();
+  qb.entity = EntityEnum.ACTIVITY_LIST;
+  qb.queryType = QueryTypeEnum.LIST;
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  if (activitycat != 'All') {
+    qb.addFilterField('ActivityTypeCode');
+    qb.addFilterValue('1');
+    if (activitycat == 'Events') { qb.filterVariable = '!='; };
+  }
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filterVariable = '!=';
+  };
+  qb.sort = 'StartDateTime';
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
-    +'_dc=1523226229268'
-    +'&allowUnlimitedResults=true'
-    +'&fields=ActivityId%2CActivityName%2CStartDate%2CActivityTypeCode%2CCampusName%2CBuildingCode%2CRoomNumber%2CLocationName%2CStartDateTime%2CEndDateTime%2CInstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CDays%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CCanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CSectionId%2CEventId%2CEventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)%2CParentActivityId%2CParentActivityName'
-    +'&entityProps='
-    +'&_s=1'
-    //+'&filter=((EventMeetingByActivityId.Event.EventTypeId%20in%20(%2287d1fd31-ed30-4d72-afc4-b9ccca353d17%22%2C%2233190952-df04-4afa-bbf1-fa923307d376%22%2C%22d9a038cb-07b8-4dff-93db-9bb40bfa3bb8%22%2C%222fe1a011-fae4-40e4-a8ba-eb13e9377abd%22%2C%222e668140-8a52-4b87-9d8c-6cbd21b00f88%22%2C%22e1b72515-5b52-48ef-8c9d-bcf0496160f9%22%2C%22d93c1faa-dd70-4d5f-a440-fd59a832538e%22%2C%22c113ecc2-22f4-4df5-b761-71bdd5a0db62%22%2C%22c6984173-d2ba-418f-9680-19ff40ee8732%22%2C%222ace0010-a887-47f0-af2a-163ae303e7de%22%2C%223475b814-f76a-42a5-bf37-2cacce11b5e5%22%2C%22fd907c3d-ef0a-4855-9fff-cde983890d0f%22%2C%22de84148d-6920-482b-bb5e-07b3e1b728d9%22%2C%2209e14c46-a5d0-462f-aff1-c06ade5a771f%22))%26%26((ActivityTypeCode%3D%3D2)%26%26(StartDateTime%20%3E%3D%20%222018-04-08T00%3A00%3A00%22%20%26%26%20StartDateTime%20%3C%3D%20%222018-05-09T23%3A59%3A59%22)))'
-    +'&sortOrder=%2BStartDateTime'
-    +'&page=1'
-    +'&start=0'
-    +'&limit=20'
-    +'&sort=%5B%7B%22property%22%3A%22StartDateTime%22%2C%22direction%22%3A%22ASC%22%7D%5D';
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint + qb.toQueryString();
 
   const credentialData = {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
   };
-
   axiosCookieJarSupport(axios);
   const cookieJar = new tough.CookieJar();
 
   axios.post(logonUrl, credentialData, {
-      jar: cookieJar,
-      headers: {
-        withCredentials: true,
-      }
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
   }).then(function (response) {
     if (response.data !== true) {
       res.sendStatus(401);
     }
-    cookieJar.store.getAllCookies(function(err, cookies) {
+    cookieJar.store.getAllCookies(function (err, cookies) {
       if (cookies === undefined) {
         res.send('failed to get cookies after login');
       } else {
@@ -101,26 +182,19 @@ router.get('/all', (req, res, next) => {
             cookie: cookies.join('; ')
           }
         }).then(function (response) {
-          let fieldList = response.data.fields.split(",");
           let activityData = response.data.data;
-          let allActivities = [];
-          for (let i = 0; i < activityData.length; i++) {
-            allActivities[i] = {}
-            for (let j = 0; j < fieldList.length; j++) {
-              allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
-            }
-          }
+          let myresults = createresultlist(activityData);
           res.setHeader('Content-Type', 'application/json');
-          res.send(allActivities);
+          res.send(myresults);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
       }
     });
   })
-  .catch(function (error) {
-    res.send('respond with a resource - error ' + error);
-  });
+    .catch(function (error) {
+      res.send('respond with a resource - error ' + error);
+    });
 });
 
 /**
@@ -134,15 +208,28 @@ router.get('/all', (req, res, next) => {
  *       - name: start
  *         description: The beginning date for a range search (inclusive)
  *         in: query
- *         required: true
- *         type: string 
+ *         required: false
+ *         type: string
  *         format: date
  *       - name: end
  *         description: The end date for a range search (inclusive)
  *         in: query
- *         required: true
- *         type: string 
+ *         required: false
+ *         type: string
  *         format: date
+  *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
  *     produces:
  *       - application/json
  *     responses:
@@ -154,27 +241,368 @@ router.get('/all', (req, res, next) => {
 router.get('/findByDateRange', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
-  
-    var qb = new QueryBuilder();
-    qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode']);
-    qb.addFields(['CampusName', 'BuildingCode', 'RoomNumber', 'LocationName']);
-    qb.addFields(['StartDateTime', 'EndDateTime']);
-    qb.addField('InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
-    qb.addField('Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
-    qb.addField('CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
-    qb.addFields(['SectionId', 'EventId']);
-    qb.addField('EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)');
-    qb.addFields(['ParentActivityId', 'ParentActivityName']);
+
+  var qb = new QBget();
+  qb.queryType = QueryTypeEnum.DATE_RANGE;
+  qb.entity = EntityEnum.ACTIVITY_LIST;
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filterVariable = '!=';
+  };
+  qb.sort = 'StartDateTime';
+  if (filterStartDate){
     qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
     qb.endDate = filterEndDate;
+  };
 
-    // todo add some of the other fields below:
-    //qb.addFields(['MeetingType', 'Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
-    //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
-    //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
-    //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+    + qb.toQueryString();
 
-  if (filterStartDate && filterEndDate) {
+  const credentialData = {
+    username: config.defaultApi.username,
+    password: config.defaultApi.password,
+  };
+
+  axiosCookieJarSupport(axios);
+  const cookieJar = new tough.CookieJar();
+
+  axios.post(logonUrl, credentialData, {
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
+  }).then(function (response) {
+    if (response.data !== true) {
+      res.sendStatus(401);
+    }
+    cookieJar.store.getAllCookies(function (err, cookies) {
+      if (cookies === undefined) {
+        res.send('failed to get cookies after login');
+      } else {
+        axios.get(activitiesUrl, {
+          jar: cookieJar,
+          headers: {
+            cookie: cookies.join('; ')
+          }
+        }).then(function (response) {
+          let activityData = response.data.data;
+          let myresults = createresultlist(activityData);
+          res.setHeader('Content-Type', 'application/json');
+          res.send(myresults);
+        }).catch(function (error) {
+          res.send('respond with a resource - error ' + error);
+        });
+      }
+    });
+  })
+    .catch(function (error) {
+      res.send('respond with a resource - error ' + error);
+    });
+});
+
+/**
+ * @swagger
+ * /activities/filterbyActivityType:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns all activities in the given range with the requested activitytype
+ *     parameters:
+ *       - name: start
+ *         description: The beginning date for a range search (inclusive)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: date
+ *       - name: end
+ *         description: The end date for a range search (inclusive)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: date
+ *       - name: activitytype
+ *         description: Select an activitytype
+ *         in: query
+ *         enum: ["EventType","EventMeetingType","SectionMeetingType"]
+ *         required: true
+ *         type: string 
+ *       - name: typename
+ *         description: Enter the activitytype name (i.e. Lecture, Internal Meeting, etc.)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *       - name: filterfields
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtervalues
+ *         description: Create comma delimited string for multiple values
+ *         in: query
+ *         type: string 
+ *       - name: filtertype
+ *         description: Select an filtertype
+ *         in: query
+ *         enum: ["equals_/_in","not_equals/not_in"]
+ *         type: string 
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities by selected date range and activitytype
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
+router.get('/filterbyActivityType', (req, res, next) => {
+  const filterStartDate = req.query.start;
+  const filterEndDate = req.query.end;
+  const filterActivityType = req.query.activitytype;
+  const filterTypeName = req.query.typename;
+
+  var qb = new QBget();
+  qb.queryType = QueryTypeEnum.DATE_RANGE;
+  qb.entity = EntityEnum.ACTIVITY_LIST;
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.sort = 'StartDateTime';
+  if (filterStartDate){
+    qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
+    qb.endDate = filterEndDate;
+  };
+  if (filterActivityType == 'EventType') {
+    qb.addFilterField('EventMeetingByActivityId.Event.EventType.Name');
+  } else if (filterActivityType == 'EventMeetingType') {
+    qb.addFilterField('EventMeetingByActivityId.EventMeetingType.Name');
+  } else {
+    qb.addFilterField('SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name');
+  }
+  qb.addFilterValue(filterTypeName);
+  qb.addFilterField(req.query.filterfields);
+  qb.addFilterValue(req.query.filtervalues);
+  if(req.query.filtertype == 'not_equals/not_in'){
+    qb.filterVariable = '!=';
+  };
+
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+    + qb.toQueryString();
+
+  const credentialData = {
+    username: config.defaultApi.username,
+    password: config.defaultApi.password,
+  };
+
+  axiosCookieJarSupport(axios);
+  const cookieJar = new tough.CookieJar();
+
+  axios.post(logonUrl, credentialData, {
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
+  }).then(function (response) {
+    if (response.data !== true) {
+      res.sendStatus(401);
+    }
+    cookieJar.store.getAllCookies(function (err, cookies) {
+      if (cookies === undefined) {
+        res.send('failed to get cookies after login');
+      } else {
+        axios.get(activitiesUrl, {
+          jar: cookieJar,
+          headers: {
+            cookie: cookies.join('; ')
+          }
+        }).then(function (response) {
+          let activityData = response.data.data;
+          let myresults = createresultlist(activityData);
+          res.setHeader('Content-Type', 'application/json');
+          res.send(myresults);
+        }).catch(function (error) {
+          res.send('respond with a resource - error ' + error);
+        });
+      }
+    });
+  })
+    .catch(function (error) {
+      res.send('respond with a resource - error ' + error);
+    });
+});
+
+/**
+ * @swagger
+ * /activities/findConflicts:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns all activities in the given range
+ *     parameters:
+ *       - name: start
+ *         description: The beginning datetime (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime
+ *       - name: end
+ *         description: The end date for a range search (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
+router.get('/findConflicts', (req, res, next) => {
+  const filterStartDate = req.query.start;
+  const filterEndDate = req.query.end;
+
+  var qb = new QBget();
+  qb.queryType = QueryTypeEnum.CONFLICTS;  
+  qb.entity = EntityEnum.ACTIVITY_LIST;
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.sort = 'StartDateTime';
+  if (filterStartDate){
+    qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
+    qb.endDate = filterEndDate;
+  };
+
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+    + qb.toQueryString();
+
+    const credentialData = {
+      username: config.defaultApi.username,
+      password: config.defaultApi.password,
+    };
+
+    axiosCookieJarSupport(axios);
+    const cookieJar = new tough.CookieJar();
+
+    axios.post(logonUrl, credentialData, {
+      jar: cookieJar,
+      headers: {
+        withCredentials: true,
+      }
+    }).then(function (response) {
+      if (response.data !== true) {
+        res.sendStatus(401);
+      }
+      cookieJar.store.getAllCookies(function (err, cookies) {
+        if (cookies === undefined) {
+          res.send('failed to get cookies after login');
+        } else {
+          axios.get(activitiesUrl, {
+            jar: cookieJar,
+            headers: {
+              cookie: cookies.join('; ')
+            }
+          }).then(function (response) {
+            let activityData = response.data.data;
+            let myresults = createresultlist(activityData);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(myresults);
+          }).catch(function (error) {
+            res.send('respond with a resource - error ' + error);
+          });
+        }
+      });
+    })
+      .catch(function (error) {
+        res.send('respond with a resource - error ' + error);
+      });
+});
+
+/**
+ * @swagger
+ * /activities/findroomConflicts:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns all activities in the given range
+ *     parameters:
+ *       - name: start
+ *         description: The beginning datetime (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime
+ *       - name: end
+ *         description: The end date for a range search (YYYY-MM-DDTHH:MM:SS)
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: datetime
+ *       - name: roomId
+ *         description: roomid to filter down conflict range
+ *         in: query
+ *         required: true
+ *         type: string 
+ *         format: string
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
+router.get('/findroomConflicts', (req, res, next) => {
+  const filterStartDate = req.query.start;
+  const filterEndDate = req.query.end;
+  const filterRoomId = req.query.roomId;
+
+  var qb = new QBget();
+  qb.entity = EntityEnum.ACTIVITY_LIST;
+  qb.queryType = QueryTypeEnum.CONFLICTS;  
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.sort = 'StartDateTime';
+  if (filterStartDate){
+    qb.startDate = filterStartDate;
+  };
+  if (filterEndDate){
+    qb.endDate = filterEndDate;
+  };
+  if (filterRoomId) {
+    qb.addFilterField('Location.RoomId');
+    qb.addFilterValue(filterRoomId);
+  } 
+
     const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
     const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
       + qb.toQueryString();
@@ -188,15 +616,15 @@ router.get('/findByDateRange', (req, res, next) => {
     const cookieJar = new tough.CookieJar();
 
     axios.post(logonUrl, credentialData, {
-        jar: cookieJar,
-        headers: {
-          withCredentials: true,
-        }
+      jar: cookieJar,
+      headers: {
+        withCredentials: true,
+      }
     }).then(function (response) {
       if (response.data !== true) {
         res.sendStatus(401);
       }
-      cookieJar.store.getAllCookies(function(err, cookies) {
+      cookieJar.store.getAllCookies(function (err, cookies) {
         if (cookies === undefined) {
           res.send('failed to get cookies after login');
         } else {
@@ -206,29 +634,101 @@ router.get('/findByDateRange', (req, res, next) => {
               cookie: cookies.join('; ')
             }
           }).then(function (response) {
-            let fieldList = response.data.fields.split(",");
             let activityData = response.data.data;
-            let allActivities = [];
-            for (let i = 0; i < activityData.length; i++) {
-              allActivities[i] = {}
-              for (let j = 0; j < fieldList.length; j++) {
-                allActivities[i][camelCase(fieldList[j])] = activityData[i][j];
-              }
-            }
+            let myresults = createresultlist(activityData);
             res.setHeader('Content-Type', 'application/json');
-            res.send(allActivities);
+            res.send(myresults);
           }).catch(function (error) {
             res.send('respond with a resource - error ' + error);
           });
         }
       });
     })
+      .catch(function (error) {
+        res.send('respond with a resource - error ' + error);
+      });
+});
+
+/**
+ * @swagger
+ * /activities/filtered:
+ *   get:
+ *     tags:
+ *       - activities
+ *     description: Returns activities through the facade protocol while allowing the ability to create an advanced custom filter
+ *     parameters:
+ *       - name: advancedFilter
+ *         description: create an activitylist filter
+ *         in: query
+ *         required: false
+ *         type: string 
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of activities
+ *         schema:
+ *           $ref: '#/definitions/Activity'
+ */
+router.get('/filtered', (req, res, next) => {
+  const advancedFilter = req.query.advancedFilter;
+
+  var qb = new QBget();
+  qb.queryType = QueryTypeEnum.ADVANCED;  
+  qb.entity = EntityEnum.ACTIVITY_LIST;
+  qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
+  qb.addFields(['LocationName', 'StartDateTime', 'EndDateTime', 'InstructorName%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['Days%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'CanView%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)']);
+  qb.addFields(['SectionId', 'EventId', 'EventImage%3Astrjoin2(%22%20%22%2C%20%22%20%22%2C%20%22%20%22)', 'ParentActivityId', 'ParentActivityName']);
+  qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
+  qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
+  //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
+  qb.advancedFilter = advancedFilter;
+  qb.sort = 'StartDateTime';
+
+  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint + qb.toQueryString();
+
+  const credentialData = {
+    username: config.defaultApi.username,
+    password: config.defaultApi.password,
+  };
+
+  axiosCookieJarSupport(axios);
+  const cookieJar = new tough.CookieJar();
+
+  axios.post(logonUrl, credentialData, {
+    jar: cookieJar,
+    headers: {
+      withCredentials: true,
+    }
+  }).then(function (response) {
+    if (response.data !== true) {
+      res.sendStatus(401);
+    }
+    cookieJar.store.getAllCookies(function (err, cookies) {
+      if (cookies === undefined) {
+        res.send('failed to get cookies after login');
+      } else {
+        axios.get(activitiesUrl, {
+          jar: cookieJar,
+          headers: {
+            cookie: cookies.join('; ')
+          }
+        }).then(function (response) {
+          let activityData = response.data.data;
+          let myresults = createresultlist(activityData);
+          res.setHeader('Content-Type', 'application/json');
+          res.send(myresults);
+        }).catch(function (error) {
+          res.send('respond with a resource - error ' + error);
+        });
+      }
+    });
+  })
     .catch(function (error) {
       res.send('respond with a resource - error ' + error);
     });
-  } else {
-    res.send('invalid parameters');
-  }
 });
 
 module.exports = router;

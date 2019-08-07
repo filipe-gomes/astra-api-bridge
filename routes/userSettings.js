@@ -9,25 +9,29 @@ const QBget = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
+
 /**
  * @swagger
  * definition:
- *   ActivityType:
+ *   UserSettings:
  *     properties:
- *       activityTypeId:
+ *       userSettingsId:
  *         type: string
- *       activityTypeName:
+ *       userSettingsName:
+ *         type: string
+ *       isDeleted:
  *         type: string
  *       index:
  *         type: integer
- */
-
-function createresultlist(activityTypeData) {
+ */ 
+ 
+function createresultlist(userSettingsData) {
   let resultlist = [];
-  for (let i = 0; i < activityTypeData.length; i++) {
+  for (let i = 0; i < userSettingsData.length; i++) {
     resultlist[i] = {};
-    resultlist[i].activityTypeId = activityTypeData[i][0];
-    resultlist[i].activityTypeName = activityTypeData[i][1];
+    resultlist[i].userSettingsId = userSettingsData[i][0];
+    resultlist[i].userSettingsName = userSettingsData[i][1];
+    resultlist[i].isdeleted = userSettingsData[i][2];
     resultlist[i].index = i;
   }
   return resultlist;
@@ -35,11 +39,11 @@ function createresultlist(activityTypeData) {
 
 /**
  * @swagger
- * /activity-types/eventtypes:
+ * /userSettings/role:
  *   get:
  *     tags:
- *       - activity-types
- *     description: Returns a list of event types.  Valid filter parameters include having no filters, having a single filter value in both the filterfields and the filtervalues boxes (=), having the same number of values in each box (=), and having a single value in the filterfields box and many values in the filtervalues box ("in").
+ *       - userSettings
+ *     description: Returns role name(s) and id(s) based on filtered request
  *     parameters:
  *       - name: filterfields
  *         description: Create comma delimited string for multiple values
@@ -58,16 +62,16 @@ function createresultlist(activityTypeData) {
  *       - application/json
  *     responses:
  *       200:
- *         description: An array of activity types
+ *         description: An array of roles
  *         schema:
- *           $ref: '#/definitions/ActivityType'
+ *           $ref: '#/definitions/UserSettings'
  */
-router.get('/eventtypes', (req, res, next) => {
+router.get('/role', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = EntityEnum.EVENT_TYPE;
-  qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
+  qb.entity = EntityEnum.ROLE;
+  qb.addFields(['Id', 'Name', 'IsDeleted']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
-  qb.queryType = QueryTypeEnum.LIST;
+  qb.queryType = QueryTypeEnum.LIST;  
   qb.addFilterField(req.query.filterfields);
   qb.addFilterValue(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
@@ -75,7 +79,7 @@ router.get('/eventtypes', (req, res, next) => {
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-  const activityTypesUrl = config.defaultApi.url + config.defaultApi.eventTypesEndpoint
+  const userSettingsUrl = config.defaultApi.url + config.defaultApi.roleEndpoint
   +qb.toQueryString();
 
   const credentialData = {
@@ -99,14 +103,14 @@ router.get('/eventtypes', (req, res, next) => {
       if (cookies === undefined) {
         res.send('failed to get cookies after login');
       } else {
-        axios.get(activityTypesUrl, {
+        axios.get(userSettingsUrl, {
           jar: cookieJar,
           headers: {
             cookie: cookies.join('; ')
           }
         }).then(function (response) {          
-          let activityTypeData = response.data.data;
-          let myresults = createresultlist(activityTypeData);
+          let userSettingsData = response.data.data;
+          let myresults = createresultlist(userSettingsData);
           res.setHeader('Content-Type', 'application/json');
           res.send(myresults);
         }).catch(function (error) {
@@ -122,11 +126,11 @@ router.get('/eventtypes', (req, res, next) => {
 
 /**
  * @swagger
- * /activity-types/eventmeetingtypes:
+ * /userSettings/permission:
  *   get:
  *     tags:
- *       - activity-types
- *     description: Returns a list of event meeting types.  Valid filter parameters include having no filters, having a single filter value in both the filterfields and the filtervalues boxes (=), having the same number of values in each box (=), and having a single value in the filterfields box and many values in the filtervalues box ("in").
+ *       - userSettings
+ *     description: Returns permission name(s) and id(s) based on filtered request
  *     parameters:
  *       - name: filterfields
  *         description: Create comma delimited string for multiple values
@@ -145,13 +149,13 @@ router.get('/eventtypes', (req, res, next) => {
  *       - application/json
  *     responses:
  *       200:
- *         description: An array of activity types
+ *         description: An array of permissions
  *         schema:
- *           $ref: '#/definitions/ActivityType'
+ *           $ref: '#/definitions/UserSettings'
  */
-router.get('/eventmeetingtypes', (req, res, next) => {
+router.get('/permission', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = EntityEnum.EVENT_MEETING_TYPE;
+  qb.entity = EntityEnum.PERMISSION;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
@@ -162,9 +166,8 @@ router.get('/eventmeetingtypes', (req, res, next) => {
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-  const activityTypesUrl = config.defaultApi.url + config.defaultApi.eventMeetingTypesEndpoint
-    +qb.toQueryString();
-
+  const userSettingsUrl = config.defaultApi.url + config.defaultApi.permEndpoint
+  +qb.toQueryString();
   const credentialData = {
     username: config.defaultApi.username,
     password: config.defaultApi.password,
@@ -186,14 +189,14 @@ router.get('/eventmeetingtypes', (req, res, next) => {
       if (cookies === undefined) {
         res.send('failed to get cookies after login');
       } else {
-        axios.get(activityTypesUrl, {
+        axios.get(userSettingsUrl, {
           jar: cookieJar,
           headers: {
             cookie: cookies.join('; ')
           }
         }).then(function (response) {          
-          let activityTypeData = response.data.data;
-          let myresults = createresultlist(activityTypeData);
+          let userSettingsData = response.data.data;
+          let myresults = createresultlist(userSettingsData);
           res.setHeader('Content-Type', 'application/json');
           res.send(myresults);
         }).catch(function (error) {
@@ -209,48 +212,46 @@ router.get('/eventmeetingtypes', (req, res, next) => {
 
 /**
  * @swagger
- * /activity-types/meetingtypes:
+ * /userSettings/checkpermissions:
  *   get:
  *     tags:
- *       - activity-types
- *     description: Returns a list of section meeting types.  Valid filter parameters include having no filters, having a single filter value in both the filterfields and the filtervalues boxes (=), having the same number of values in each box (=), and having a single value in the filterfields box and many values in the filtervalues box ("in").
+ *       - userSettings
+ *     description: Returns permission name(s) and id(s) based on filtered request
  *     parameters:
- *       - name: filterfields
- *         description: Create comma delimited string for multiple values
+ *       - name: permission
+ *         description: enter the name of the permission
  *         in: query
  *         type: string 
- *       - name: filtervalues
- *         description: Create comma delimited string for multiple values
+ *       - name: role
+ *         description: enter the name of the role
  *         in: query
- *         type: string 
- *       - name: filtertype
- *         description: Select an filtertype
- *         in: query
- *         enum: ["equals_/_in","not_equals/not_in"]
  *         type: string 
  *     produces:
  *       - application/json
  *     responses:
  *       200:
- *         description: An array of activity types
- *         schema:
- *           $ref: '#/definitions/ActivityType'
+ *         description: A role permission record if exists
  */
-router.get('/meetingtypes', (req, res, next) => {
+router.get('/checkpermissions', (req, res, next) => {
   var qb = new QBget();
-  qb.entity = EntityEnum.MEETING_TYPE;
-  qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
+  qb.entity = EntityEnum.PERMISSION;
+  qb.addFields(['Id','Name','Roles.Id', 'Roles.Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
-  if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
-  };
+  qb.addFilterField('Roles.isdeleted'); 
+  qb.addFilterValue('0'); 
+  if(req.query.permission){
+      qb.addFilterField('Name');
+      qb.addFilterValue(req.query.permission);
+  }
+  if(req.query.role){
+    qb.addFilterField('Roles.Name');
+    qb.addFilterValue(req.query.role);
+  }
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-  const activityTypesUrl = config.defaultApi.url + config.defaultApi.meetingTypesEndpoint
-    +qb.toQueryString();
+  const userSettingsUrl = config.defaultApi.url + config.defaultApi.permEndpoint
+  +qb.toQueryString();
 
   const credentialData = {
     username: config.defaultApi.username,
@@ -273,16 +274,24 @@ router.get('/meetingtypes', (req, res, next) => {
       if (cookies === undefined) {
         res.send('failed to get cookies after login');
       } else {
-        axios.get(activityTypesUrl, {
+        axios.get(userSettingsUrl, {
           jar: cookieJar,
           headers: {
             cookie: cookies.join('; ')
           }
         }).then(function (response) {          
-          let activityTypeData = response.data.data;
-          let myresults = createresultlist(activityTypeData);
+          let userSettingsData = response.data.data;
+          let resultlist = [];
+          for (let i = 0; i < userSettingsData.length; i++) {
+            resultlist[i] = {};
+            resultlist[i].profileId = userSettingsData[i][0];
+            resultlist[i].profileName = userSettingsData[i][1];
+            resultlist[i].roleId = userSettingsData[i][2];
+            resultlist[i].roleName = userSettingsData[i][3];
+            resultlist[i].index = i;
+          }
           res.setHeader('Content-Type', 'application/json');
-          res.send(myresults);
+          res.send(resultlist);
         }).catch(function (error) {
           res.send('respond with a resource - error ' + error);
         });
@@ -293,5 +302,6 @@ router.get('/meetingtypes', (req, res, next) => {
     res.send('respond with a resource - error ' + error);
   });
 });
+
 
 module.exports = router;
