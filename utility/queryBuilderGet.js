@@ -3,9 +3,6 @@ const moment = require('moment');
 const QueryTypeEnum = require('./queryTypeEnum');
 const EntityEnum = require('./entityEnum');
 
-// todo: add queryBuilderPost and basic calls
-
-
 function translateField(entity, fieldname) {
     let entityfield = fieldname;    
     if (entity ===  'activityList'){
@@ -29,7 +26,8 @@ function translateField(entity, fieldname) {
     return entityfield;
 }
 
-module.exports = class QBGet {
+module.exports = class ReadQueryBuilder {
+
     constructor() {
         this._entity = EntityEnum.UNDEFINED;
         this._queryType = QueryTypeEnum.UNDEFINED;  
@@ -43,7 +41,7 @@ module.exports = class QBGet {
         this._filterValues = [];
         this._startDate = '';
         this._endDate = '';
-        this._filterVariable = '==';  //or '!='
+        this._equalityFilter = true;  // true : ==, false : !=
         this._advancedFilter = '';  //free text filter with no translation
     }
 
@@ -63,12 +61,12 @@ module.exports = class QBGet {
         this._queryType = enumVal;
     }
 
-    get filterVariable() {
-        return this._filterVariable;
+    get equalityFilter() {
+        return this._equalityFilter;
     }
 
-    set filterVariable(string) {
-        this._filterVariable = string;
+    set equalityFilter(val) {
+        this._equalityFilter = val;
     }
     get sort() {
         return this._sort;
@@ -90,35 +88,23 @@ module.exports = class QBGet {
         }
     }
 
-    addFilterField(field) {
-        if (field) {
-            let filterfields = {};
-            filterfields = field.split(",");
-            for (let i = 0; i < filterfields.length; i++) {
-                this._filterFields.push(translateField(this._entity,filterfields[i]));
-            }
-        }
-    }
-
     addFilterFields(fields) {
         if (fields) {
-            this._filterFields = this._filterFields.concat(fields);
-        }
-    }
-
-    addFilterValue(field) {
-        if (field) {
-            let valuefields = {};
-            valuefields = field.split(",");
-            for (let i = 0; i < valuefields.length; i++) {
-                this._filterValues.push(translateField(this._entity,valuefields[i]));
+            let fieldArr = {};
+            fieldArr = fields.split(",");
+            for (let i = 0; i < fieldArr.length; i++) {
+                this._filterFields.push(translateField(this._entity,fieldArr[i]));
             }
         }
     }
-
-    addFilterValues(fields) {
-        if (fields) {
-            this._filterValues = this._filterValues.concat(fields);
+    
+    addFilterValues(values) {
+        if (values) {
+            let valueArr = {};
+            valueArr = values.split(",");
+            for (let i = 0; i < valueArr.length; i++) {
+                this._filterValues.push(translateField(this._entity,valueArr[i]));
+            }
         }
     }
 
@@ -137,7 +123,7 @@ module.exports = class QBGet {
     set endDate(date) {
         this._endDate = moment(date).format('YYYY-MM-DDTHH:mm:ss');
     }
-
+    
     get advancedFilter() {
         return this._advancedFilter;
     }
@@ -185,7 +171,7 @@ module.exports = class QBGet {
         let filter = '&filter=(';
         if (this._filterFields.length < this._filterValues.length) {
             var filt = this._filterFields[0].trim();
-            if (this._filterVariable == '==') {
+            if (this._equalityFilter) {
                 filter += filt + ' in (';
                 for (let i = 0; i < this._filterValues.length; i++) {
                     var valu = this._filterValues[i].trim();
@@ -210,10 +196,11 @@ module.exports = class QBGet {
             if (this._filterValues[i]) {
                 var valu = this._filterValues[i].trim();
             }
+            let comparisonOperator = this._equalityFilter ? '==' : '!=';
             if (this._filterFields.length - 1 == i) {
-                filter += '(' + filt + this._filterVariable + '"' + valu + '"))';
+                filter += '(' + filt + comparisonOperator + '"' + valu + '"))';
             } else {
-                filter += '(' + filt + this._filterVariable + '"' + valu + '")%26%26';
+                filter += '(' + filt + comparisonOperator + '"' + valu + '")%26%26';
             }
         }
         return filter;
@@ -240,7 +227,6 @@ module.exports = class QBGet {
             //add date range or conflict filters
             if (this._queryType === QueryTypeEnum.DATE_RANGE) {
                 query += this.buildDateRange();
-
             } else if (this._queryType == QueryTypeEnum.CONFLICTS) {
                 query += this.buildConflictsFilter();
             }

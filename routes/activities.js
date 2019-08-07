@@ -4,7 +4,7 @@ var axios = require('axios');
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -130,7 +130,7 @@ return resultlist;
 router.get('/all', (req, res, next) => {
   const activitycat = req.query.activitycategory;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.queryType = QueryTypeEnum.LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -141,14 +141,14 @@ router.get('/all', (req, res, next) => {
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
   //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
   if (activitycat != 'All') {
-    qb.addFilterField('ActivityTypeCode');
-    qb.addFilterValue('1');
-    if (activitycat == 'Events') { qb.filterVariable = '!='; };
+    qb.addFilterFields('ActivityTypeCode');
+    qb.addFilterValues('1');
+    if (activitycat == 'Events') { qb.equalityFilter = false; };
   }
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   qb.sort = 'StartDateTime';
 
@@ -241,7 +241,7 @@ router.get('/findByDateRange', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.DATE_RANGE;
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -251,10 +251,10 @@ router.get('/findByDateRange', (req, res, next) => {
   qb.addFields(['EventMeetingByActivityId.Event.EventType.Name', 'EventMeetingByActivityId.EventMeetingType.Name']);
   qb.addFields(['SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name', 'Location.RoomId']);
   //any changes to fields must also be reflected in the createresultlist function and the swagger definition above
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   qb.sort = 'StartDateTime';
   if (filterStartDate){
@@ -368,7 +368,7 @@ router.get('/filterbyActivityType', (req, res, next) => {
   const filterActivityType = req.query.activitytype;
   const filterTypeName = req.query.typename;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.DATE_RANGE;
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -386,17 +386,17 @@ router.get('/filterbyActivityType', (req, res, next) => {
     qb.endDate = filterEndDate;
   };
   if (filterActivityType == 'EventType') {
-    qb.addFilterField('EventMeetingByActivityId.Event.EventType.Name');
+    qb.addFilterFields('EventMeetingByActivityId.Event.EventType.Name');
   } else if (filterActivityType == 'EventMeetingType') {
-    qb.addFilterField('EventMeetingByActivityId.EventMeetingType.Name');
+    qb.addFilterFields('EventMeetingByActivityId.EventMeetingType.Name');
   } else {
-    qb.addFilterField('SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name');
+    qb.addFilterFields('SectionMeetInstanceByActivityId.SectionMeeting.MeetingType.Name');
   }
-  qb.addFilterValue(filterTypeName);
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterValues(filterTypeName);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -477,7 +477,7 @@ router.get('/findConflicts', (req, res, next) => {
   const filterStartDate = req.query.start;
   const filterEndDate = req.query.end;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.CONFLICTS;  
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -580,7 +580,7 @@ router.get('/findroomConflicts', (req, res, next) => {
   const filterEndDate = req.query.end;
   const filterRoomId = req.query.roomId;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.queryType = QueryTypeEnum.CONFLICTS;  
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);
@@ -598,8 +598,8 @@ router.get('/findroomConflicts', (req, res, next) => {
     qb.endDate = filterEndDate;
   };
   if (filterRoomId) {
-    qb.addFilterField('Location.RoomId');
-    qb.addFilterValue(filterRoomId);
+    qb.addFilterFields('Location.RoomId');
+    qb.addFilterValues(filterRoomId);
   } 
 
     const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -672,7 +672,7 @@ router.get('/findroomConflicts', (req, res, next) => {
 router.get('/filtered', (req, res, next) => {
   const advancedFilter = req.query.advancedFilter;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.queryType = QueryTypeEnum.ADVANCED;  
   qb.entity = EntityEnum.ACTIVITY_LIST;
   qb.addFields(['ActivityId', 'ActivityName', 'StartDate', 'ActivityTypeCode', 'CampusName', 'BuildingCode', 'RoomNumber']);

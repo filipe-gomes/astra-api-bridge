@@ -4,7 +4,7 @@ var axios = require('axios');
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -66,15 +66,15 @@ function createresultlist(userSettingsData) {
  *           $ref: '#/definitions/UserSettings'
  */
 router.get('/role', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ROLE;
   qb.addFields(['Id', 'Name', 'IsDeleted']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;  
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -153,15 +153,15 @@ router.get('/role', (req, res, next) => {
  *           $ref: '#/definitions/UserSettings'
  */
 router.get('/permission', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.PERMISSION;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -232,20 +232,20 @@ router.get('/permission', (req, res, next) => {
  *         description: A role permission record if exists
  */
 router.get('/checkpermissions', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.PERMISSION;
   qb.addFields(['Id','Name','Roles.Id', 'Roles.Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField('Roles.isdeleted'); 
-  qb.addFilterValue('0'); 
+  qb.addFilterFields('Roles.isdeleted'); 
+  qb.addFilterValues('0'); 
   if(req.query.permission){
-      qb.addFilterField('Name');
-      qb.addFilterValue(req.query.permission);
+      qb.addFilterFields('Name');
+      qb.addFilterValues(req.query.permission);
   }
   if(req.query.role){
-    qb.addFilterField('Roles.Name');
-    qb.addFilterValue(req.query.role);
+    qb.addFilterFields('Roles.Name');
+    qb.addFilterValues(req.query.role);
   }
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

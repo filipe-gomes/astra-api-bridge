@@ -4,7 +4,7 @@ var axios = require('axios');
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -62,15 +62,15 @@ function createresultlist(activityTypeData) {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/eventtypes', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.EVENT_TYPE;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -149,15 +149,15 @@ router.get('/eventtypes', (req, res, next) => {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/eventmeetingtypes', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.EVENT_MEETING_TYPE;
   qb.addFields(['Id', 'Name']);  //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
@@ -236,15 +236,15 @@ router.get('/eventmeetingtypes', (req, res, next) => {
  *           $ref: '#/definitions/ActivityType'
  */
 router.get('/meetingtypes', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.MEETING_TYPE;
   qb.addFields(['Id', 'Name']); //any changes to fields must also be reflected in the createresultlist function and the swagger definitions above
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;

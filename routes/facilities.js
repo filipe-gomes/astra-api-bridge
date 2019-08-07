@@ -4,7 +4,7 @@ var axios = require('axios');
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const config = require('../config');
-const QBget = require('../utility/queryBuilderGet');
+const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 
@@ -65,15 +65,15 @@ const EntityEnum = require('../utility/entityEnum');
  *           $ref: '#/definitions/Campus'
  */
 router.get('/campuslist', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.CAMPUS;
   qb.addFields(['Id', 'Name', 'IsActive']);
   qb.sort = 'Name';
   qb.queryType = QueryTypeEnum.LIST;
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const campusUrl = config.defaultApi.url + config.defaultApi.campusEndpoint
@@ -158,15 +158,15 @@ router.get('/campuslist', (req, res, next) => {
  *           $ref: '#/definitions/Building'
  */
 router.get('/buildinglist', (req, res, next) => {
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.BUILDING;
   qb.addFields(['Id', 'Name', 'BuildingCode', 'Campus.Name','IsActive']);
   qb.sort = 'Campus.Name%2CName';
   qb.queryType = QueryTypeEnum.LIST;  
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const buildingsUrl = config.defaultApi.url + config.defaultApi.buildingsEndpoint
@@ -255,16 +255,16 @@ router.get('/buildinglist', (req, res, next) => {
  */
 router.get('/roomlist', (req, res, next) => {
   
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ROOM;
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
   qb.queryType = QueryTypeEnum.LIST;  
-  qb.addFilterField(req.query.filterfields);
-  qb.addFilterValue(req.query.filtervalues);
+  qb.addFilterFields(req.query.filterfields);
+  qb.addFilterValues(req.query.filtervalues);
   if(req.query.filtertype == 'not_equals/not_in'){
-    qb.filterVariable = '!=';
+    qb.equalityFilter = false;
   };
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
@@ -349,14 +349,14 @@ router.get('/roomlist', (req, res, next) => {
 router.get('/availroomslist', (req, res, next) => {
   const filterconflicts = req.query.Conflicts;
 
-  var qb = new QBget();
+  var qb = new ReadQueryBuilder();
   qb.entity = EntityEnum.ROOM;
   qb.addFields(['Id', 'Name', 'roomNumber', 'RoomType.Name']);
   qb.addFields(['Building.Name', 'Building.BuildingCode', 'MaxOccupancy', 'IsActive']);
   qb.sort = '%2BBuilding.Name,Name';
-  qb.addFilterField('Id');
-  qb.addFilterValue(filterconflicts);
-  qb.filterVariable = '!=';
+  qb.addFilterFields('Id');
+  qb.addFilterValues(filterconflicts);
+  qb.equalityFilter = false;
 
   const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const roomsUrl = config.defaultApi.url + config.defaultApi.roomsEndpoint
