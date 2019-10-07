@@ -33,15 +33,16 @@ describe('/GET all conflicting activities by datetime range', () => {
       });
   }).timeout(15000);
   
-  it('should GET all the rooms in friendly JSON', (done) => {
-    chai.request(app)
-      .get('/facilities/availroomslist?Conflicts='+conflicts)
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.should.be.json;
-        done();
-      });
-  }).timeout(15000);
+  // it('should GET all the rooms in friendly JSON', (done) => {
+  //   chai.request(app)
+  //     .get('/facilities/availroomslist?Conflicts='+conflicts)
+  //     .end((err, res) => {
+  //       console.log(JSON.stringify(res));
+  //       res.should.have.status(200);
+  //       res.should.be.json;
+  //       done();
+  //     });
+  // }).timeout(15000);
 
 });
 
