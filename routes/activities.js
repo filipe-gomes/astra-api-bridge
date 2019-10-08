@@ -7,6 +7,7 @@ const config = require('../config');
 const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
+const CredentialedQuery = require('../utility/credentialedQuery');
 
 {/**swagger def
  * @swagger
@@ -152,48 +153,17 @@ router.get('/all', (req, res, next) => {
   };
   qb.sort = 'StartDateTime';
 
-  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint + qb.toQueryString();
 
-  const credentialData = {
-    username: config.defaultApi.username,
-    password: config.defaultApi.password,
-  };
-  axiosCookieJarSupport(axios);
-  const cookieJar = new tough.CookieJar();
-
-  axios.post(logonUrl, credentialData, {
-    jar: cookieJar,
-    headers: {
-      withCredentials: true,
-    }
-  }).then(function (response) {
-    if (response.data !== true) {
-      res.sendStatus(401);
-    }
-    cookieJar.store.getAllCookies(function (err, cookies) {
-      if (cookies === undefined) {
-        res.send('failed to get cookies after login');
-      } else {
-        axios.get(activitiesUrl, {
-          jar: cookieJar,
-          headers: {
-            cookie: cookies.join('; ')
-          }
-        }).then(function (response) {
-          let activityData = response.data.data;
-          let myresults = createresultlist(activityData);
-          res.setHeader('Content-Type', 'application/json');
-          res.send(myresults);
-        }).catch(function (error) {
-          res.send('respond with a resource - error ' + error);
-        });
-      }
-    });
-  })
-    .catch(function (error) {
-      res.send('respond with a resource - error ' + error);
-    });
+  var cq = new CredentialedQuery();
+  cq.get(activitiesUrl, res).then(function (response) {
+    let activityData = response.data.data;
+    let myresults = createresultlist(activityData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(myresults);
+  }).catch(function (error) {
+    res.send(error);
+  });
 });
 
 /**
@@ -264,50 +234,18 @@ router.get('/findByDateRange', (req, res, next) => {
     qb.endDate = filterEndDate;
   };
 
-  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
     + qb.toQueryString();
 
-  const credentialData = {
-    username: config.defaultApi.username,
-    password: config.defaultApi.password,
-  };
-
-  axiosCookieJarSupport(axios);
-  const cookieJar = new tough.CookieJar();
-
-  axios.post(logonUrl, credentialData, {
-    jar: cookieJar,
-    headers: {
-      withCredentials: true,
-    }
-  }).then(function (response) {
-    if (response.data !== true) {
-      res.sendStatus(401);
-    }
-    cookieJar.store.getAllCookies(function (err, cookies) {
-      if (cookies === undefined) {
-        res.send('failed to get cookies after login');
-      } else {
-        axios.get(activitiesUrl, {
-          jar: cookieJar,
-          headers: {
-            cookie: cookies.join('; ')
-          }
-        }).then(function (response) {
-          let activityData = response.data.data;
-          let myresults = createresultlist(activityData);
-          res.setHeader('Content-Type', 'application/json');
-          res.send(myresults);
-        }).catch(function (error) {
-          res.send('respond with a resource - error ' + error);
-        });
-      }
-    });
-  })
-    .catch(function (error) {
-      res.send('respond with a resource - error ' + error);
-    });
+  var cq = new CredentialedQuery();
+  cq.get(activitiesUrl, res).then(function (response) {
+    let activityData = response.data.data;
+    let myresults = createresultlist(activityData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(myresults);
+  }).catch(function (error) {
+    res.send(error);
+  });
 });
 
 /**
@@ -399,50 +337,18 @@ router.get('/filterbyActivityType', (req, res, next) => {
     qb.equalityFilter = false;
   };
 
-  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
     + qb.toQueryString();
 
-  const credentialData = {
-    username: config.defaultApi.username,
-    password: config.defaultApi.password,
-  };
-
-  axiosCookieJarSupport(axios);
-  const cookieJar = new tough.CookieJar();
-
-  axios.post(logonUrl, credentialData, {
-    jar: cookieJar,
-    headers: {
-      withCredentials: true,
-    }
-  }).then(function (response) {
-    if (response.data !== true) {
-      res.sendStatus(401);
-    }
-    cookieJar.store.getAllCookies(function (err, cookies) {
-      if (cookies === undefined) {
-        res.send('failed to get cookies after login');
-      } else {
-        axios.get(activitiesUrl, {
-          jar: cookieJar,
-          headers: {
-            cookie: cookies.join('; ')
-          }
-        }).then(function (response) {
-          let activityData = response.data.data;
-          let myresults = createresultlist(activityData);
-          res.setHeader('Content-Type', 'application/json');
-          res.send(myresults);
-        }).catch(function (error) {
-          res.send('respond with a resource - error ' + error);
-        });
-      }
-    });
-  })
-    .catch(function (error) {
-      res.send('respond with a resource - error ' + error);
-    });
+  var cq = new CredentialedQuery();
+  cq.get(activitiesUrl, res).then(function (response) {
+    let activityData = response.data.data;
+    let myresults = createresultlist(activityData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(myresults);
+  }).catch(function (error) {
+    res.send(error);
+  });
 });
 
 /**
@@ -495,51 +401,19 @@ router.get('/findConflicts', (req, res, next) => {
     qb.endDate = filterEndDate;
   };
 
-  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
     + qb.toQueryString();
 
-    const credentialData = {
-      username: config.defaultApi.username,
-      password: config.defaultApi.password,
-    };
-
-    axiosCookieJarSupport(axios);
-    const cookieJar = new tough.CookieJar();
-
-    axios.post(logonUrl, credentialData, {
-      jar: cookieJar,
-      headers: {
-        withCredentials: true,
-      }
-    }).then(function (response) {
-      if (response.data !== true) {
-        res.sendStatus(401);
-      }
-      cookieJar.store.getAllCookies(function (err, cookies) {
-        if (cookies === undefined) {
-          res.send('failed to get cookies after login');
-        } else {
-          axios.get(activitiesUrl, {
-            jar: cookieJar,
-            headers: {
-              cookie: cookies.join('; ')
-            }
-          }).then(function (response) {
-            let activityData = response.data.data;
-            let myresults = createresultlist(activityData);
-            res.setHeader('Content-Type', 'application/json');
-            res.send(myresults);
-          }).catch(function (error) {
-            res.send('respond with a resource - error ' + error);
-          });
-        }
-      });
-    })
-      .catch(function (error) {
-        res.send('respond with a resource - error ' + error);
-      });
-});
+  var cq = new CredentialedQuery();
+  cq.get(activitiesUrl, res).then(function (response) {
+    let activityData = response.data.data;
+    let myresults = createresultlist(activityData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(myresults);
+  }).catch(function (error) {
+    res.send(error);
+  });
+ });
 
 /**
  * @swagger
@@ -602,50 +476,18 @@ router.get('/findroomConflicts', (req, res, next) => {
     qb.addFilterValues(filterRoomId);
   } 
 
-    const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
-    const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
-      + qb.toQueryString();
+  const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint
+    + qb.toQueryString();
 
-    const credentialData = {
-      username: config.defaultApi.username,
-      password: config.defaultApi.password,
-    };
-
-    axiosCookieJarSupport(axios);
-    const cookieJar = new tough.CookieJar();
-
-    axios.post(logonUrl, credentialData, {
-      jar: cookieJar,
-      headers: {
-        withCredentials: true,
-      }
-    }).then(function (response) {
-      if (response.data !== true) {
-        res.sendStatus(401);
-      }
-      cookieJar.store.getAllCookies(function (err, cookies) {
-        if (cookies === undefined) {
-          res.send('failed to get cookies after login');
-        } else {
-          axios.get(activitiesUrl, {
-            jar: cookieJar,
-            headers: {
-              cookie: cookies.join('; ')
-            }
-          }).then(function (response) {
-            let activityData = response.data.data;
-            let myresults = createresultlist(activityData);
-            res.setHeader('Content-Type', 'application/json');
-            res.send(myresults);
-          }).catch(function (error) {
-            res.send('respond with a resource - error ' + error);
-          });
-        }
-      });
-    })
-      .catch(function (error) {
-        res.send('respond with a resource - error ' + error);
-      });
+  var cq = new CredentialedQuery();
+  cq.get(activitiesUrl, res).then(function (response) {
+    let activityData = response.data.data;
+    let myresults = createresultlist(activityData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(myresults);
+  }).catch(function (error) {
+    res.send(error);
+  }); 
 });
 
 /**
@@ -685,49 +527,17 @@ router.get('/filtered', (req, res, next) => {
   qb.advancedFilter = advancedFilter;
   qb.sort = 'StartDateTime';
 
-  const logonUrl = config.defaultApi.url + config.defaultApi.logonEndpoint;
   const activitiesUrl = config.defaultApi.url + config.defaultApi.activityListEndpoint + qb.toQueryString();
 
-  const credentialData = {
-    username: config.defaultApi.username,
-    password: config.defaultApi.password,
-  };
-
-  axiosCookieJarSupport(axios);
-  const cookieJar = new tough.CookieJar();
-
-  axios.post(logonUrl, credentialData, {
-    jar: cookieJar,
-    headers: {
-      withCredentials: true,
-    }
-  }).then(function (response) {
-    if (response.data !== true) {
-      res.sendStatus(401);
-    }
-    cookieJar.store.getAllCookies(function (err, cookies) {
-      if (cookies === undefined) {
-        res.send('failed to get cookies after login');
-      } else {
-        axios.get(activitiesUrl, {
-          jar: cookieJar,
-          headers: {
-            cookie: cookies.join('; ')
-          }
-        }).then(function (response) {
-          let activityData = response.data.data;
-          let myresults = createresultlist(activityData);
-          res.setHeader('Content-Type', 'application/json');
-          res.send(myresults);
-        }).catch(function (error) {
-          res.send('respond with a resource - error ' + error);
-        });
-      }
-    });
-  })
-    .catch(function (error) {
-      res.send('respond with a resource - error ' + error);
-    });
+  var cq = new CredentialedQuery();
+  cq.get(activitiesUrl, res).then(function (response) {
+    let activityData = response.data.data;
+    let myresults = createresultlist(activityData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(myresults);
+  }).catch(function (error) {
+    res.send(error);
+  }); 
 });
 
 module.exports = router;
