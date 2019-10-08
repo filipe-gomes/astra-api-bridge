@@ -3,7 +3,7 @@
 </p>
 
 ***
-[![Build Status](https://travis-ci.org/adastradev/astra-api-facade.svg?branch=master)](https://travis-ci.org/adastradev/astra-api-facade)
+[![Build Status](https://travis-ci.org/adastradev/astra-api-facade.svg?branch=master)](https://travis-ci.org/adastradev/astra-api-bridge)
 [![Dependency Status](https://david-dm.org/adastradev/astra-api-facade.svg)](https://david-dm.org/adastradev/astra-api-facade)
 [![Dev Dependency Status](https://david-dm.org/adastradev/astra-api-facade/dev-status.svg)](https://david-dm.org/adastradev/astra-api-facade?type=dev)
 
