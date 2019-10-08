@@ -25,16 +25,19 @@ describe('/GET all activities', () => {
       });
   }).timeout(15000);
 
-  // it('negative test to confirm error on bad password', (done) => {
-  //   var badPassword = 'BAD' + config.defaultApi.password + 'PASSWORD';
-  //   config.defaultApi.password = badPassword;
-  //   chai.request(app)
-  //     .get('/activities/all')
-  //     .end((err, res) => {
-  //       res.should.have.status(401);
-  //       done();
-  //     });
-  // }).timeout(15000);
+  it('negative test to confirm error on bad password', (done) => {
+    var goodPassword = config.defaultApi.password;
+    var badPassword = 'BAD' + goodPassword + 'PASSWORD';
+    config.defaultApi.password = badPassword;
+    chai.request(app)
+      .get('/activities/all')
+      .end((err, res) => {
+        // restore correct password so it doesn't break other tests
+        config.defaultApi.password = goodPassword; 
+        res.should.have.status(401);
+        done();
+      });      
+  }).timeout(15000);
 });
 
 describe('/GET all activities by date range', () => {
