@@ -3,6 +3,8 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let app = require('../app');
+const expect = require('chai').expect
+const config = require('../config');
 
 chai.use(chaiHttp);
 const moment = require('moment');
@@ -21,6 +23,20 @@ describe('/GET all activities', () => {
         res.should.be.json;
         done();
       });
+  }).timeout(15000);
+
+  it('negative test to confirm error on bad password', (done) => {
+    var goodPassword = config.defaultApi.password;
+    var badPassword = 'BAD' + goodPassword + 'PASSWORD';
+    config.defaultApi.password = badPassword;
+    chai.request(app)
+      .get('/activities/all')
+      .end((err, res) => {
+        // restore correct password so it doesn't break other tests
+        config.defaultApi.password = goodPassword; 
+        res.should.have.status(401);
+        done();
+      });      
   }).timeout(15000);
 });
 
