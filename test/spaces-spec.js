@@ -17,7 +17,7 @@ const moment = require('moment');
 describe('/GET available rooms', () => {
   it.only('it should GET all the rooms available in friendly JSON', (done) => {
     chai.request(app)
-      .get('/spaces/rooms') // todo RT - need to revisit the restful path
+      .get('/spaces/rooms/availability') // todo RT - need to revisit the restful path
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;

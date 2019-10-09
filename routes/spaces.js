@@ -1,162 +1,93 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
-const axiosCookieJarSupport = require('axios-cookiejar-support').default;
-const tough = require('tough-cookie');
 const config = require('../config');
 const ReadQueryBuilder = require('../utility/queryBuilderGet');
 const QueryTypeEnum = require('../utility/queryTypeEnum');
 const EntityEnum = require('../utility/entityEnum');
 const CredentialedQuery = require('../utility/credentialedQuery');
 
-{/**swagger def
- * @swagger
- * definition:
- *   Activity:
- *     properties:
- *       activityId:
- *         type: string
- *       activityName:
- *         type: string
- *       startDate:
- *         type: string
- *         format: date
- *       activityTypeCode:
- *         type: integer
- *       campusName:
- *         type: string
- *       buildingCode:
- *         type: string
- *       roomNumber:
- *         type: string
- *       locationName:
- *         type: string
- *       startDateTime:
- *         type: string
- *         format: date-time
- *       endDateTime:
- *         type: string
- *         format: date-time
- *       instructorName:
- *         type: string
- *       days:
- *         type: string
- *       canView:
- *         type: boolean
- *       eventType:
- *         type: string
- *       eventmeetingType:
- *         type: string
- *       sectionmeetingType:
- *         type: string
- *       roomId:
- *         type: string
- */
-
-  // todo add some of the other fields below:
-  //qb.addFields([Description', 'StartDate', 'EndDate', 'StartMinute', 'EndMinute', 'StartDateTime', 'EndDateTime']);    
-  //qb.addFields(['ActivityTypeCode', 'LocationId', 'CampusName', 'BuildingCode', 'RoomNumber', 'RoomName', 'LocationName']);
-  //qb.addFields(['InstitutionId', 'SectionId', 'SectionPk', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
-  //qb.addFields(['UsageColor', 'UsageColorIsPrimary', 'EventTypeColor', 'IsExam', 'IsPrivate', 'EventId', 'CurrentState']);
-
-  // todo correct join calls in activity data
-}
-
-function createresultlist(activityData) {
-  let resultlist = [];
-  for (let i = 0; i < activityData.length; i++) {
-    resultlist[i] = {};
-    resultlist[i].activityId = activityData[i][0];
-    resultlist[i].activityName = activityData[i][1];
-    resultlist[i].startDate = activityData[i][2];
-    resultlist[i].activityTypeCode = activityData[i][3];
-    resultlist[i].campusName = activityData[i][4];
-    resultlist[i].buildingCode = activityData[i][5];
-    resultlist[i].roomNumber = activityData[i][6];
-    resultlist[i].locationName = activityData[i][7];
-    resultlist[i].startDateTime = activityData[i][8];
-    resultlist[i].endDateTime = activityData[i][9];
-    resultlist[i].instructorName = activityData[i][10];
-    resultlist[i].days = activityData[i][11];
-    resultlist[i].canView = activityData[i][12];
-    resultlist[i].sectionId = activityData[i][13];
-    resultlist[i].eventId = activityData[i][14];
-    resultlist[i].eventImage = activityData[i][15];
-    resultlist[i].parentactivityId = activityData[i][16];
-    resultlist[i].parentactivityName = activityData[i][17];
-    resultlist[i].eventType = activityData[i][18];
-    resultlist[i].eventMeetingType = activityData[i][19];
-    resultlist[i].sectionMeetingType = activityData[i][20];
-    resultlist[i].roomId = activityData[i][21]
-    resultlist[i].index = i;
-  }
-return resultlist;
-}
-
 /**
  * @swagger
- * /activities/all:
+ * /spaces/rooms/availibility:
  *   get:
  *     tags:
- *       - activities
- *     description: Returns all activities, optional filter by type
+ *       - rooms
+ *     description: Returns all rooms and whether they availible for the entire time specified
  *     parameters:
- *       - name: activitycategory
- *         description: Select an activity category filter
+ *       - name: start
+ *         description: The beginning date and time 
  *         in: query
- *         enum: ["All","Academics","Events"]
  *         required: true
- *         type: string 
- *       - name: filterfields
- *         description: Create comma delimited string for multiple values
+ *         type: string
+ *         format: date
+ *       - name: end
+ *         description: The ending date and time
  *         in: query
- *         type: string 
- *       - name: filtervalues
- *         description: Create comma delimited string for multiple values
- *         in: query
- *         type: string 
- *       - name: filtertype
- *         description: Select an filtertype
- *         in: query
- *         enum: ["equals_/_in","not_equals/not_in"]
- *         type: string 
+ *         required: true
+ *         type: string
+ *         format: date
  *     produces:
  *       - application/json
  *     responses:
  *       200:
- *         description: An array of activities
+ *         description: An array of rooms with their availability specified
  *         schema:
- *           $ref: '#/definitions/Activity'
+ *           $ref: '#/definitions/Room'
  */
+router.get('/rooms/availability', (req, res, next) => {
 
-router.get('/rooms', (req, res, next) => {
-  const activitycat = req.query.activitycategory;
+  // implementation notes: this is a two step process: 
+  // 1) get a list of all rooms available at all for the date(s) 
+  // 2) find rooms that are unavailable during the actual meeting time
+
+  const filterStartDate = '2019-10-10T00:00:00'; //req.query.start;
+  const filterEndDate = '2019-10-10T00:00:00'; // req.query.end;
+
+  // todo fail the API call if either start date or end date not specified
 
   var qb = new ReadQueryBuilder();
-  // todo need entity and queryType to be set???
-  qb.addFields(['RowNumber', 'Id', 'RoomName', 'RoomDescription', 'RoomNumber']);
-  qb.addFields(['RoomTypeName', 'BuildingCode', 'BuildingName', 'CampusName']);
-  qb.addFields(['Capacity', 'BuildingRoomNumberRoomName', 'EffectiveDateId', 'CanEdit', 'CanDelete']);
-  // ?todo, need to use qb.sort = '%5B%7B%22property%22%3A%22BuildingRoomNumberRoomName%22%2C%22direction%22%3A%22ASC%22%7D%5D';
+  qb.sort = '%2BBuilding.Name,Name';
+  qb.queryType = QueryTypeEnum.ADVANCED;  
+  qb.limit = 500;
+  // todo RT extend comparison operations in query builder so we can use paramterized field/value pairs instead of this hacky 'advanced' version: 
+  var start = `EffectiveStartDate>="${filterStartDate}"`;
+  var end = `EffectiveEndDate>="${filterEndDate}"`;
+  var doNotSchedule = 'DoNotSchedule == 0';
 
-  const activitiesUrl = config.defaultApi.url + config.defaultApi.roomSearchEndpoint + qb.toQueryString()
-    + '&sortOrder=%2BBuildingRoomNumberRoomName&page='; // todo replace hack here by incorporating sortOrder into ReadQueryBuilder
+  qb.advancedFilter = encodeURIComponent(start + '&&' +  end + '&&' + doNotSchedule);
 
-//    const activitiesUrl = 
-//    config.defaultApi.url +'~api/resources/roomlist?_dc=1567607501536&query=&entityProps=BuildingName%2CCampusName&_s=1&fields=Id%2CName%2CEffectiveParentId%2CCanRequest%2CCanSchedule&filter=(((EffectiveEndDate%3E%3D%222019-09-04T00%3A00%3A00%22)%26%26(EffectiveStartDate%3C%3D%222019-09-04T00%3A00%3A00%22)))%26%26((DoNotSchedule%20%3D%3D%200))&sortOrder=%2BName&page=1&start=0&limit=500&sort=%5B%7B%22property%22%3A%22Name%22%2C%22direction%22%3A%22ASC%22%7D%5D'
-    
+  // todo consider converting to:  
+  // '/~api/search/room?_dc=1570564904737&start=0&limit=500&_s=1&fields=RowNumber%2CId%2CRoomName%2CRoomDescription%2CRoomNumber%2CRoomTypeName%2CBuildingCode%2CBuildingName%2CCampusName%2CCapacity%2CBuildingRoomNumberRoomName%2CEffectiveDateId%2CCanEdit%2CCanDelete&sortOrder=%2BBuildingRoomNumberRoomName&page=1&sort=%5B%7B%22property%22%3A%22BuildingRoomNumberRoomName%22%2C%22direction%22%3A%22ASC%22%7D%5D'
 
+  const roomsUrl = config.defaultApi.url + config.defaultApi.roomSearchEndpoint + qb.toQueryString()
 
-  var cq = new CredentialedQuery();
-  cq.get(activitiesUrl, res).then(function (response) {
-    // todo pars data
-    console.log(response.data.data);
-    let myresults = createresultlist(activityData);
-    res.setHeader('Content-Type', 'application/json');
-    res.send(myresults);
-  }).catch(function (error) {
-    res.send(error);
-  });
+    var cq = new CredentialedQuery();
+    cq.get(roomsUrl, res).then(function (response) {
+      let roomData = response.data.data;
+      let allrooms = []; 
+      for (let i = 0; i < roomData.length; i++) {
+        allrooms[i] = {};
+        allrooms[i].roomId = roomData[i][0];
+        allrooms[i].roomName = roomData[i][1];
+        allrooms[i].roomNumber = roomData[i][2];
+        allrooms[i].roomType = roomData[i][3];
+        allrooms[i].buildingName = roomData[i][4];
+        allrooms[i].buildingCode = roomData[i][5];
+        allrooms[i].maxOccupancy = roomData[i][6];
+        allrooms[i].isActive = roomData[i][7];
+        allrooms[i].index = i;
+        if (i === 1) {
+          console.log(roomData[i]);
+        }
+      }
+      console.log(response.data.data.length);
+      console.log(response.data.data[0]);
+      res.setHeader('Content-Type', 'application/json');
+      res.send(allrooms);
+    }).catch(function (error) {
+      res.send(error);
+    });
 });
 
 module.exports = router;
