@@ -74,8 +74,28 @@ router.get('/rooms/availability', (req, res, next) => {
           allrooms[i].isActive = roomData[i][7];
           allrooms[i].index = i;
         }
-        res.setHeader('Content-Type', 'application/json');
-        res.send(allrooms);
+
+        // step 2 is to find conflicting activities so we can mark those rooms as not available
+        //var secondQuery = new ReadQueryBuilder();
+        // temporary hack
+        let end2 = encodeURIComponent(filterStartDate); 
+        let start2 = encodeURIComponent(filterEndDate);
+        let secondaryQuery = 'start=0&limit=500&isForWeekView=false' + 
+          '&fields=ActivityId%2CActivityPk%2CActivityName%2CParentActivityId%2CParentActivityName%2CMeetingType%2CDescription%2CStartDate%2CEndDate%2CDayOfWeek%2CStartMinute%2CEndMinute%2CActivityTypeCode%2CResourceId%2CCampusName%2CBuildingCode%2CRoomNumber%2CRoomName%2CLocationName%2CInstitutionId%2CSectionId%2CSectionPk%2CIsExam%2CIsCrosslist%2CIsAllDay%2CIsPrivate%2CEventId%2CEventPk%2CCurrentState%2CNotAllowedUsageMask%2CUsageColor%2CUsageColorIsPrimary%2CEventTypeColor%2CMaxAttendance%2CActualAttendance%2CCapacity' + 
+          '&entityProps=&_s=1' + 
+          `&filter=(((StartDate%3C%22${start2}%22)%26%26(EndDate%3E%22${end2}%22))%26%26((NotAllowedUsageMask%3D%3Dnull)%7C%7C((NotAllowedUsageMask%268)%3D%3D8)))` +
+          '&sortOrder=%2BStartDate%2C%2BStartMinute&page=1&group=%7B%22property%22%3A%22StartDate%22%2C%22direction%22%3A%22ASC%22%7D&sort=%5B%7B%22property%22%3A%22StartDate%22%2C%22direction%22%3A%22ASC%22%7D%2C%7B%22property%22%3A%22StartMinute%22%2C%22direction%22%3A%22ASC%22%7D%5D'
+
+        const url = config.defaultApi.url + config.defaultApi.calendarWeekGridEndpoint + secondaryQuery;
+        cq.get(url, res).then(function (response) {
+          res.setHeader('Content-Type', 'application/json');
+          res.send(allrooms);
+
+          // todo need to mark off the unavailable rooms
+        })
+        .catch(function(error) {
+          res.send(error);
+        })
       }).catch(function (error) {
         res.send(error);
       });

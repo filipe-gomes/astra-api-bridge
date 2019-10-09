@@ -8,6 +8,7 @@ config.defaultApi = {
   "password" :  process.env.API_PASSWORD || 'password',
   "logonEndpoint" : 'Logon.ashx',
   "activityListEndpoint": '~api/calendar/activityList?',
+  "calendarWeekGridEndpoint": '~api/calendar/CalendarWeekGrid?',
   "eventTypesEndpoint": '~api/query/eventType?',
   "eventMeetingTypesEndpoint": '~api/query/eventMeetingType?',
   "meetingTypesEndpoint": '~api/query/meetingType?',    
