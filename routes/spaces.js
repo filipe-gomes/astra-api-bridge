@@ -110,4 +110,46 @@ router.get('/rooms/availability', (req, res, next) => {
     }
 });
 
+/**
+ * @swagger
+ * /spaces/rooms/{roomId}/reservation:
+ *   post:
+ *     tags:
+ *       - rooms
+ *     description: Reserve the given room for the time duration specified
+ *     parameters:
+ *       - name: roomId
+ *         description: Unique identifier for the room 
+ *         in: query
+ *         required: true
+ *         type: string
+ *         format: string
+ *       - name: start
+ *         description: The beginning date and time 
+ *         in: query
+ *         required: true
+ *         type: string
+ *         format: date
+ *       - name: end
+ *         description: The ending date and time
+ *         in: query
+ *         required: true
+ *         type: string
+ *         format: date
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of rooms with their availability specified
+ *         schema:
+ *           $ref: '#/definitions/Room'
+ */
+router.post('/rooms/:id/reservation', (req, res, next) => {
+  var roomId = req.params.id;
+  console.log(roomId);
+  res.sendStatus(501);
+
+});
+
+
 module.exports = router;

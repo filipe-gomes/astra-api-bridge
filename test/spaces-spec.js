@@ -50,3 +50,19 @@ describe('/GET available rooms', () => {
   }).timeout(15000);
 
 });
+
+describe('/ room reservation', () => {
+  it.only('POST create a room reservation for 0 minutes', (done) => {
+    var reservationStart = moment().startOf('day').add(5, 'hours').format();
+    var reservationEnd = reservationStart;
+
+    chai.request(app)
+    .post('/spaces/rooms/fakeRoomId/reservation?start=' + reservationStart + '&end=' + reservationEnd)
+      .end((err, res) => {
+        // not implemented yet, so expect that...
+        res.should.have.status(501);
+        done();
+      });
+  }).timeout(15000);
+
+});
