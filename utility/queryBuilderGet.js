@@ -68,12 +68,21 @@ module.exports = class ReadQueryBuilder {
     set equalityFilter(val) {
         this._equalityFilter = val;
     }
+
     get sort() {
         return this._sort;
     }
 
     set sort(string) {
         this._sort = string;
+    }
+
+    get limit() {
+        return this._limit;
+    }
+
+    set limit(num) {
+        this._limit = num;
     }
 
     addField(field) {
