@@ -7,11 +7,11 @@ const CredentialedQuery = require('../utility/credentialedQuery');
 
 /**
  * @swagger
- * /spaces/rooms/availibility:
+ * /spaces/rooms/availability:
  *   get:
  *     tags:
  *       - rooms
- *     description: Returns all rooms and whether they availible for the entire time specified
+ *     description: Returns all rooms and whether they available for the entire time specified
  *     parameters:
  *       - name: start
  *         description: The beginning date and time 
@@ -61,18 +61,13 @@ router.get('/rooms/availability', (req, res, next) => {
       var cq = new CredentialedQuery();
       cq.get(roomsUrl, res).then(function (response) {
         let roomData = response.data.data;
-        let allrooms = []; 
+        let rooms = []; 
         for (let i = 0; i < roomData.length; i++) {
-          allrooms[i] = {};
-          allrooms[i].roomId = roomData[i][0];
-          allrooms[i].roomName = roomData[i][1];
-          allrooms[i].roomNumber = roomData[i][2];
-          allrooms[i].roomType = roomData[i][3];
-          allrooms[i].buildingName = roomData[i][4];
-          allrooms[i].buildingCode = roomData[i][5];
-          allrooms[i].maxOccupancy = roomData[i][6];
-          allrooms[i].isActive = roomData[i][7];
-          allrooms[i].index = i;
+          rooms[i] = {};
+          rooms[i].roomId = roomData[i][0];
+          rooms[i].roomBuildingAndNumber = roomData[i][1];
+          rooms[i].whyIsRoomIdHereTwice = roomData[i][2];
+          rooms[i].available = true; // assume this until disproven by retrieving activity list
         }
 
         // step 2 is to find conflicting activities so we can mark those rooms as not available
@@ -89,9 +84,22 @@ router.get('/rooms/availability', (req, res, next) => {
         const url = config.defaultApi.url + config.defaultApi.calendarWeekGridEndpoint + secondaryQuery;
         cq.get(url, res).then(function (response) {
           res.setHeader('Content-Type', 'application/json');
-          res.send(allrooms);
 
-          // todo need to mark off the unavailable rooms
+          let data = response.data.data;
+          let unavailableRooms = [];
+          for (let i = 0; i < data.length; i++) {
+            let roomId = data[i][13]
+            unavailableRooms[i] = roomId;
+
+            // this is brute force O(n^2), might want to consider a more elegant solution
+            rooms.forEach(function(item, index) {
+              if (item.roomId === roomId) {
+                item.available = false;
+              }
+            })
+          }
+          res.send(rooms);
+
         })
         .catch(function(error) {
           res.send(error);
