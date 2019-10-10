@@ -9,7 +9,7 @@ var swaggerDefinition = {
     version: '0.0.2',
     description: 'This is a RESTful API that layers on top of the Astra Schedule API',
   },
-  host: 'localhost:3000',
+  // host: 'localhost:3000',
   basePath: '/',
 };
 
