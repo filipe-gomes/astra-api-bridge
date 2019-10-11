@@ -147,11 +147,10 @@ router.get('/rooms/availability', (req, res, next) => {
  *           $ref: '#/definitions/Room'
  */
  router.post('/rooms/:id/reservation', async (req, res, next) => {
-  var roomId = req.params.id;
+  const roomId = req.params.id;
   console.log(roomId);
-  let startDate = req.query.start;
-  let endDate = req.query.end;
-  console.log(startDate + ' # ' + endDate);
+  // const start = req.query.start;
+  // const end = req.query.end;
 
   // INPUTS
   const userEmail = 'DemoUser@aais.com';
@@ -168,10 +167,19 @@ router.get('/rooms/availability', (req, res, next) => {
   // const password = 'apple';
   const originatingUserName = 'guest'; // we should look into creating an outlook user and config'ing that
 
-  // const startDate = from.setHours(0,0,0,0);
-  // const endDate = to.setHours(0,0,0,0);
-  // const startMinute = from.getMinutes();
-  // const endMinute = to.getMinutes();
+
+    const from = new Date('2019-08-17 01:00:00.000');
+    const to = new Date('2019-08-17 02:00:00.000');
+    const startDate = from.setHours(0,0,0,0);
+    const endDate = to.setHours(0,0,0,0);
+    const startMinute = from.getMinutes();
+    const endMinute = to.getMinutes();
+
+  // const startDate = start.setHours(0,0,0,0);
+  // const endDate = end.setHours(0,0,0,0);
+  // const startMinute = start.getMinutes();
+  // const endMinute = end.getMinutes();
+  console.log(`${startDate} , ${endDate} , ${startMinute} , ${endMinute}`);
   const description = `This event was created by ${userName} (${userEmail}) and automatically created here by the Ad Astra Outlook Add-in.`;
   const currentYear = new Date().getFullYear().toString(); // todo RT -- why do we need this
 
@@ -283,14 +291,14 @@ router.get('/rooms/availability', (req, res, next) => {
 
 
   // TODO Unsure what event type to use for this - is 'Unknown' standard?
-  // await axios.get(`${baseUrl}/~api/query/EventType?fields=Id,Name&filter=IsActive%3D%3D1`).data[0][0];
+  // await cq.get(`${config.defaultApi.url}/~api/query/EventType?fields=Id,Name&filter=IsActive%3D%3D1`, res).then((response) => {
+  //   console.log(response);
+  // }).catch((error) => { console.error(error); });
+
   // let eventTypeId = null; 
   // let eventTypeName = null;
   // console.log(`eventTypeId = ${eventTypeId}`);
   // console.log(`eventTypeName = ${eventTypeName}`);
-
-    res.sendStatus(501);
-    /*
 
     const postBody = JSON.stringify({
         "EventRequest": {
@@ -311,8 +319,8 @@ router.get('/rooms/availability', (req, res, next) => {
                     "Email": userEmail,
                     "EstimatedAttendance": null,
                     "EventReqFormId": eventRequestFormId,
-                    "EventTypeId": eventTypeId,
-                    "EventTypeName": eventTypeName,
+                    // "EventTypeId": eventTypeId,
+                    // "EventTypeName": eventTypeName,
                     "Fax": null,
                     "FirstName": null,
                     "FullName": null,
@@ -353,8 +361,8 @@ router.get('/rooms/availability', (req, res, next) => {
                     "EstimatedAttendance": 0,
                     "EventOwnerName": "", // ??
                     "EventRequestId": eventRequestId,
-                    "EventTypeId": eventTypeId,
-                    "EventTypeName": eventTypeName,
+                    // "EventTypeId": eventTypeId,
+                    // "EventTypeName": eventTypeName,
                     "ExternalDescriptionId": null,
                     "InstitutionContactId": null,
                     "InstitutionId": institutionId,
@@ -488,7 +496,7 @@ router.get('/rooms/availability', (req, res, next) => {
                         RequestedSetupTeardown = 5,
                         PartitionConflict = 6,
                         HolidayConflict = 7
-                    * /
+                    */
                     "WorkflowIntent": "S",
                     "WorkflowIntentOwnerId": originatingUserId,
                     "WorkflowState": null
@@ -496,11 +504,15 @@ router.get('/rooms/availability', (req, res, next) => {
             ]
         }
     });
+
     console.log(`postBody = ${postBody}`);
-    axios.post(`${baseUrl}/~api/Entity`, postBody, { jar: cookieJar }).then((response) => {
+
+    await cq.post(`${config.defaultApi.url}/~api/Entity`, postBody, res).then((response) => {
         console.log(JSON.stringify(response.data));
-    }).catch((error) => { console.error(error); });
-*/
+        res.sendStatus(200);
+      }).catch((error) => { console.error(error); });
+
+
 });
 
 module.exports = router;
