@@ -24,7 +24,8 @@
     "morgan": "^1.9.1",
     "swagger-jsdoc": "^3.3.0",
     "swagger-ui-express": "^4.0.7",
-    "tough-cookie": "^3.0.1"
+    "tough-cookie": "^3.0.1",
+    "uuidv4": "^5.0.1"
   },
   "devDependencies": {
     "chai-http": "^4.3.0",
