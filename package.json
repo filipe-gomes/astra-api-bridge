@@ -20,7 +20,7 @@
     "enumify": "^1.0.4",
     "express": "^4.17.1",
     "mocha": "^6.2.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "morgan": "^1.9.1",
     "swagger-jsdoc": "^3.3.0",
     "swagger-ui-express": "^4.0.7",
